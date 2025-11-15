@@ -6,4 +6,15 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="9.0.11" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.14.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SchoolHubAPI.Contracts\SchoolHubAPI.Contracts.csproj" />
+    <ProjectReference Include="..\SchoolHubAPI.Service.Contracts\SchoolHubAPI.Service.Contracts.csproj" />
+  </ItemGroup>
+
 </Project>

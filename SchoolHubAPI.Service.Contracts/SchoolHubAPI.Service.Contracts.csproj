@@ -6,4 +6,9 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\SchoolHubAPI.Entities\SchoolHubAPI.Entities.csproj" />
+    <ProjectReference Include="..\SchoolHubAPI.Shared\SchoolHubAPI.Shared.csproj" />
+  </ItemGroup>
+
 </Project>

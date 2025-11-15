@@ -6,4 +6,13 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.11" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SchoolHubAPI.Contracts\SchoolHubAPI.Contracts.csproj" />
+    <ProjectReference Include="..\SchoolHubAPI.Entities\SchoolHubAPI.Entities.csproj" />
+  </ItemGroup>
+
 </Project>
