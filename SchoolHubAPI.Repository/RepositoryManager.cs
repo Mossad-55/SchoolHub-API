@@ -1,12 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using SchoolHubAPI.Contracts;
 
-namespace SchoolHubAPI.Repository
+namespace SchoolHubAPI.Repository;
+
+public class RepositoryManager : IRepositoryManager
 {
-    internal class RepositoryManager
+    private readonly RepositoryContext _repositoryContext;
+
+    public RepositoryManager(RepositoryContext repositoryContext)
     {
+        _repositoryContext = repositoryContext;
     }
+
+    // Repositories 
+
+    // Common Methods
+    public async Task SaveChangesAsync() => await _repositoryContext.SaveChangesAsync();
 }
