@@ -8,5 +8,7 @@ public class User : IdentityUser<Guid>
     public DateTime? UpdatedDate { get; set; }
 
     // Roles Profiles
-
+    public virtual Admin? Admin { get; set; }
+    public virtual Student? Student { get; set; }
+    public virtual Teacher? Teacher { get; set; }
 }
