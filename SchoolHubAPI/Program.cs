@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using SchoolHubAPI.Extensions;
+using SchoolHubAPI.Presentation.ActionFilters;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,7 +12,7 @@ builder.Services.ConfigureJWT(builder.Configuration);
 builder.Services.AddJwtConfigurationClass(builder.Configuration);
 builder.Services.ConfigureRepositoryManager();
 
-
+builder.Services.AddScoped<ValidationFilterAttribute>();
 builder.Services.AddControllers(config =>
 {
     config.RespectBrowserAcceptHeader = true; // Accept header support
