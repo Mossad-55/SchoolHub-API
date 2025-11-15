@@ -9,6 +9,7 @@ builder.Services.ConfigureSqlContext(builder.Configuration);
 builder.Services.ConfigureIdentity();
 builder.Services.ConfigureJWT(builder.Configuration);
 builder.Services.AddJwtConfigurationClass(builder.Configuration);
+builder.Services.ConfigureRepositoryManager();
 
 
 builder.Services.AddControllers(config =>

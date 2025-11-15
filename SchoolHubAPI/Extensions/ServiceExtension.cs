@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using SchoolHubAPI.Contracts;
 using SchoolHubAPI.Entities.ConfigurationModels;
 using SchoolHubAPI.Entities.Entities;
 using SchoolHubAPI.Repository;
@@ -79,5 +80,9 @@ public static class ServiceExtension
     public static void AddJwtConfigurationClass(this IServiceCollection services, IConfiguration configuration) =>
         services.Configure<JwtConfiguration>(configuration.GetSection("JwtSettings"));
 
+    // Repository Manager Configuration
+    public static void ConfigureRepositoryManager(this IServiceCollection services) =>
+        services.AddScoped<IRepositoryManager, RepositoryManager>();
 
+    //
 }
