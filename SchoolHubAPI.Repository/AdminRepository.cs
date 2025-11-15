@@ -6,7 +6,8 @@ namespace SchoolHubAPI.Repository;
 
 internal sealed class AdminRepository : RepositoryBase<Admin>, IAdminRepository
 {
-    public AdminRepository(RepositoryContext repositoryContext) : base(repositoryContext)
+    public AdminRepository(RepositoryContext repositoryContext) 
+        : base(repositoryContext)
     {
     }
 
@@ -19,8 +20,8 @@ internal sealed class AdminRepository : RepositoryBase<Admin>, IAdminRepository
         .Include(a => a.User)
         .SingleOrDefaultAsync();
 
-    public Task<List<Admin>>? GetAllAdminsAsync(bool trackChanges) =>
-        FindAll(trackChanges)
+    public async Task<List<Admin>>? GetAllAdminsAsync(bool trackChanges) =>
+        await FindAll(trackChanges)
         .Include(a => a.User)
         .ToListAsync();
 
