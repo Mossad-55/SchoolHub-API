@@ -1,4 +1,4 @@
-﻿namespace SchoolHubAPI.Shared.DTOs;
+﻿namespace SchoolHubAPI.Shared.DTOs.Admin;
 
 public record AdminDto
 {

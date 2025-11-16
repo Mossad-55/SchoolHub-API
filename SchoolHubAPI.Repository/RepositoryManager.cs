@@ -2,7 +2,7 @@
 
 namespace SchoolHubAPI.Repository;
 
-public class RepositoryManager : IRepositoryManager
+public sealed class RepositoryManager : IRepositoryManager
 {
     private readonly RepositoryContext _repositoryContext;
     private readonly Lazy<IAdminRepository> _adminRepository;

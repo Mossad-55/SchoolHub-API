@@ -3,7 +3,7 @@ using SchoolHubAPI.Contracts;
 using SchoolHubAPI.Entities.Entities;
 using SchoolHubAPI.Entities.Exceptions;
 using SchoolHubAPI.Service.Contracts;
-using SchoolHubAPI.Shared.DTOs;
+using SchoolHubAPI.Shared.DTOs.Admin;
 
 namespace SchoolHubAPI.Service;
 

@@ -1,4 +1,4 @@
-﻿using SchoolHubAPI.Shared.DTOs;
+﻿using SchoolHubAPI.Shared.DTOs.Admin;
 
 namespace SchoolHubAPI.Service.Contracts;
 

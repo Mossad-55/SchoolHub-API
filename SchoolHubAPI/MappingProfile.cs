@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using SchoolHubAPI.Entities.Entities;
-using SchoolHubAPI.Shared.DTOs;
+using SchoolHubAPI.Shared.DTOs.Admin;
 
 namespace SchoolHubAPI;
 

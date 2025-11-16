@@ -7,6 +7,8 @@ using SchoolHubAPI.Entities.ConfigurationModels;
 using SchoolHubAPI.Entities.Entities;
 using SchoolHubAPI.LoggerService;
 using SchoolHubAPI.Repository;
+using SchoolHubAPI.Service;
+using SchoolHubAPI.Service.Contracts;
 using System.Text;
 
 namespace SchoolHubAPI.Extensions;
@@ -88,4 +90,8 @@ public static class ServiceExtension
     // Logger Configuration
     public static void ConfigureLoggerService(this IServiceCollection services) =>
         services.AddSingleton<ILoggerManager, LoggerManager>();
+
+    // Service Manager Configuration
+    public static void ConfigureServiceManager(this IServiceCollection services) =>
+        services.AddScoped<IServiceManager, ServiceManager>();
 }
