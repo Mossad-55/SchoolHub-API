@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Diagnostics;
+using SchoolHubAPI.Contracts;
 using SchoolHubAPI.Entities.ErrorModel;
 using SchoolHubAPI.Entities.Exceptions;
 
@@ -6,7 +7,7 @@ namespace SchoolHubAPI.Extensions;
 
 public static class ExceptionMiddlewareExtension
 {
-    public static void ConfigureExceptionHandler(this WebApplication app)
+    public static void ConfigureExceptionHandler(this WebApplication app, ILoggerManager logger)
     {
         app.UseExceptionHandler(appError =>
         {
@@ -24,6 +25,9 @@ public static class ExceptionMiddlewareExtension
                         UnauthorizedAccessException => StatusCodes.Status401Unauthorized,
                         _ => StatusCodes.Status500InternalServerError
                     };
+
+                    // Logging the error
+                    logger.LogError($"Something went wrong: {contextFeature.Error}");
 
                     await context.Response.WriteAsync(new ErrorDetails()
                     {

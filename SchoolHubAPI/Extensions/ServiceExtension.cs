@@ -5,6 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using SchoolHubAPI.Contracts;
 using SchoolHubAPI.Entities.ConfigurationModels;
 using SchoolHubAPI.Entities.Entities;
+using SchoolHubAPI.LoggerService;
 using SchoolHubAPI.Repository;
 using System.Text;
 
@@ -84,5 +85,7 @@ public static class ServiceExtension
     public static void ConfigureRepositoryManager(this IServiceCollection services) =>
         services.AddScoped<IRepositoryManager, RepositoryManager>();
 
-    //
+    // Logger Configuration
+    public static void ConfigureLoggerService(this IServiceCollection services) =>
+        services.AddSingleton<ILoggerManager, LoggerManager>();
 }

@@ -11,6 +11,7 @@ builder.Services.ConfigureIdentity();
 builder.Services.ConfigureJWT(builder.Configuration);
 builder.Services.AddJwtConfigurationClass(builder.Configuration);
 builder.Services.ConfigureRepositoryManager();
+builder.Services.ConfigureLoggerService();
 
 builder.Services.AddScoped<ValidationFilterAttribute>();
 builder.Services.AddControllers(config =>
