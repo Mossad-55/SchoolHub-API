@@ -4,6 +4,7 @@ namespace SchoolHubAPI.Entities.Entities;
 
 public class User : IdentityUser<Guid>  
 {
+    public string? Name { get; set; }
     public DateTime? CreatedDate { get; set; }
     public DateTime? UpdatedDate { get; set; }
 

@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using SchoolHubAPI.Contracts;
 using SchoolHubAPI.Extensions;
 using SchoolHubAPI.Presentation.ActionFilters;
 
@@ -12,6 +13,7 @@ builder.Services.ConfigureJWT(builder.Configuration);
 builder.Services.AddJwtConfigurationClass(builder.Configuration);
 builder.Services.ConfigureRepositoryManager();
 builder.Services.ConfigureLoggerService();
+builder.Services.AddAutoMapper(typeof(Program));
 
 builder.Services.AddScoped<ValidationFilterAttribute>();
 builder.Services.AddControllers(config =>
@@ -30,7 +32,8 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
 
 var app = builder.Build();
 
-app.ConfigureExceptionHandler();
+var logger = app.Services.GetRequiredService<ILoggerManager>();
+app.ConfigureExceptionHandler(logger);
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
