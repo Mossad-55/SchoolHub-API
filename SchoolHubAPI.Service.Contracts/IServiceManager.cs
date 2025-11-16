@@ -3,5 +3,5 @@
 public interface IServiceManager
 {
     IAdminService AdminService { get; }
-
+    ITeacherService TeacherService { get; }
 }

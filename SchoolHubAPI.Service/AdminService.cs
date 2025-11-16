@@ -13,9 +13,9 @@ internal sealed class AdminService : IAdminService
     private readonly IMapper _mapper;
     private readonly ILoggerManager _logger;
     
-    public AdminService(IRepositoryManager repositoryManager, IMapper mapper, ILoggerManager logger)
+    public AdminService(IRepositoryManager repository, IMapper mapper, ILoggerManager logger)
     {
-        _repository = repositoryManager;
+        _repository = repository;
         _mapper = mapper;
         _logger = logger;
     }

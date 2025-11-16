@@ -1,6 +1,6 @@
-﻿namespace SchoolHubAPI.Shared.DTOs.Admin;
+﻿namespace SchoolHubAPI.Shared.DTOs.Teacher;
 
-public record AdminDto
+public record TeacherDto
 {
     public Guid? UserId { get; set; }
     public string? Email { get; set; }
