@@ -4,6 +4,7 @@ using SchoolHubAPI.Entities.Entities;
 using SchoolHubAPI.Entities.Exceptions;
 using SchoolHubAPI.Service.Contracts;
 using SchoolHubAPI.Shared.DTOs.Admin;
+using SchoolHubAPI.Shared.RequestFeatures;
 
 namespace SchoolHubAPI.Service;
 
@@ -36,17 +37,17 @@ internal sealed class AdminService : IAdminService
         _logger.LogInfo($"Admin created for user {userId}");
     }
 
-    public async Task<IEnumerable<AdminDto>>? GetAllAsync(bool trackChanges)
+    public async Task<(IEnumerable<AdminDto>, MetaData)>? GetAllAsync(RequestParameters requestParameters, bool trackChanges)
     {
         _logger.LogDebug($"Fetching all admins (trackChanges={trackChanges})");
 
-        var adminEntities = await _repository.Admin.GetAllAdminsAsync(trackChanges)!;
+        var adminEntitiesWithMetaData = await _repository.Admin.GetAllAdminsAsync(requestParameters, trackChanges)!;
 
-        var adminDtos = _mapper.Map<IEnumerable<AdminDto>>(adminEntities);
+        var adminDtos = _mapper.Map<IEnumerable<AdminDto>>(adminEntitiesWithMetaData);
 
-        _logger.LogInfo($"Fetched {adminEntities?.Count ?? 0} admins");
+        _logger.LogInfo($"Fetched {adminDtos?.Count() ?? 0} admins");
 
-        return adminDtos;
+        return (adminDtos, adminEntitiesWithMetaData.MetaData)!;
     }
 
     public async Task<AdminDto?> GetByIdAsync(Guid id, bool trackChanges)
