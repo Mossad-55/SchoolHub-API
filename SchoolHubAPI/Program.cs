@@ -15,8 +15,11 @@ builder.Services.ConfigureRepositoryManager();
 builder.Services.ConfigureLoggerService();
 builder.Services.AddAutoMapper(typeof(Program));
 builder.Services.ConfigureServiceManager();
+builder.Services.ConfigureAuthenticationManager();
+builder.Services.ConfigureValidators();
 
 builder.Services.AddScoped<ValidationFilterAttribute>();
+builder.Services.AddSwaggerGen();
 builder.Services.AddControllers(config =>
 {
     config.RespectBrowserAcceptHeader = true; // Accept header support
