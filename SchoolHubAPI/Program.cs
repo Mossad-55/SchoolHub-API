@@ -1,11 +1,13 @@
 using Microsoft.AspNetCore.Mvc;
+using NLog;
 using SchoolHubAPI.Contracts;
 using SchoolHubAPI.Extensions;
 using SchoolHubAPI.Presentation.ActionFilters;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+LogManager.Setup().LoadConfigurationFromFile(string.Concat(Directory.GetCurrentDirectory(), "/nlog.config"));
+
 builder.Services.ConfigureCors();
 builder.Services.ConfigureSqlContext(builder.Configuration);
 builder.Services.ConfigureIdentity();

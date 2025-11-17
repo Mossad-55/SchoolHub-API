@@ -33,7 +33,11 @@ public class MappingProfile : Profile
             opts => opts.MapFrom(x => x.UpdatedDate.HasValue ? x.UpdatedDate.Value.ToString("MMM dd, yyyy") : string.Empty));
 
         // User Mapping
-        CreateMap<UserRegisterationDto, User>();
-        CreateMap<UserUpdateDto, User>();
+        CreateMap<UserRegisterationDto, User>()
+            .ForMember(u => u.UserName, 
+            opts => opts.MapFrom(x => x.Name!.Replace(" ", "")));
+        CreateMap<UserUpdateDto, User>()
+            .ForMember(u => u.UserName,
+            opts => opts.MapFrom(x => x.Name!.Replace(" ", "")));
     }
 }

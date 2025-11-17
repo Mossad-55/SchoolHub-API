@@ -31,6 +31,8 @@ public class AuthenticationController : ControllerBase
     public async Task<IActionResult> RegisterUser([FromBody] UserRegisterationDto registerDto)
     {
         var result = await _authService.AuthenticationService.RegisterUserAsync(registerDto);
+        if (!result.Succeeded)
+            return BadRequest(new { message = string.Join(", ", result.Errors.Select(x => x.Description)) });
 
         return StatusCode(201, new { message = "Registration successful. Please login to your account." });
     }
@@ -46,11 +48,13 @@ public class AuthenticationController : ControllerBase
         }
 
         var result = await _authService.AuthenticationService.UpdateUserAsync(userId, updateDto);
+        if (!result.Succeeded)
+            return BadRequest(new { message = string.Join(", ", result.Errors.Select(x => x.Description)) });
 
         return NoContent();
     }
 
-    [HttpDelete("{id:guid}")]
+    [HttpDelete("delete/{id:guid}")]
     public async Task<IActionResult> DeleteUser(Guid id)
     {
         await _authService.AuthenticationService.DeleteUserAsync(id);
