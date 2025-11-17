@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SchoolHubAPI.Contracts;
 using SchoolHubAPI.Entities.Entities;
+using SchoolHubAPI.Repository.Extensions;
+using SchoolHubAPI.Shared.RequestFeatures;
 
 namespace SchoolHubAPI.Repository;
 
@@ -20,10 +22,16 @@ internal sealed class AdminRepository : RepositoryBase<Admin>, IAdminRepository
         .Include(a => a.User)
         .SingleOrDefaultAsync();
 
-    public async Task<List<Admin>>? GetAllAdminsAsync(bool trackChanges) =>
-        await FindAll(trackChanges)
-        .Include(a => a.User)
-        .ToListAsync();
+    public async Task<PagedList<Admin>>? GetAllAdminsAsync(RequestParameters requestParameters, bool trackChanges)
+    {
+        var admins = await FindAll(trackChanges)
+            .Search(requestParameters.SearchTerm!)
+            .Sort(requestParameters.OrderBy!)
+            .Include(a => a.User)
+            .ToListAsync();
+
+        return PagedList<Admin>.ToPagedList(admins, requestParameters.PageNumber, requestParameters.PageSize);
+    }
 
     public void UpdateAdminAsync(Admin admin) => Update(admin);
 }
