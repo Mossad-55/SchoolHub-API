@@ -8,13 +8,16 @@ public sealed class ServiceManager : IServiceManager
 {
     private readonly Lazy<IAdminService> _adminService;
     private readonly Lazy<ITeacherService> _teacherService;
+    private readonly Lazy<IStudentService> _studentService;
 
     public ServiceManager(IRepositoryManager repositoryManager, ILoggerManager logger, IMapper mapper)
     {
         _adminService = new Lazy<IAdminService>(() => new AdminService(repositoryManager, mapper, logger));
         _teacherService = new Lazy<ITeacherService>(() => new TeacherService(repositoryManager, mapper, logger));
+        _studentService = new Lazy<IStudentService>(() => new StudentService(repositoryManager, mapper, logger));
     }
 
     public IAdminService AdminService => _adminService.Value;
-    public ITeacherService TeacherService  => _teacherService.Value;
+    public ITeacherService TeacherService => _teacherService.Value;
+    public IStudentService StudentService => _studentService.Value;
 }
