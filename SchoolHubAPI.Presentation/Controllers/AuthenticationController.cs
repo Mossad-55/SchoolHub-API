@@ -61,4 +61,13 @@ public class AuthenticationController : ControllerBase
 
         return NoContent();
     }
+
+    [HttpPost("refresh-token")]
+    [ServiceFilter(typeof(ValidationFilterAttribute))]
+    public async Task<IActionResult> RefreshToken([FromBody] TokenDto tokenDto)
+    {
+        var tokenToReturn = await _authService.AuthenticationService.GenerateRefreshTokenAsync(tokenDto);
+
+        return Ok(tokenToReturn);
+    }
 }
