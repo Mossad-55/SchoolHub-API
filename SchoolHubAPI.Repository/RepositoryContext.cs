@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using SchoolHubAPI.Entities.Entities;
+using SchoolHubAPI.Repository.Configuration;
 
 namespace SchoolHubAPI.Repository;
 
@@ -17,6 +18,7 @@ public class RepositoryContext : IdentityDbContext<User, IdentityRole<Guid>, Gui
         base.OnModelCreating(modelBuilder);
 
         // Add Configuration Data and Roles.
+        modelBuilder.ApplyConfiguration(new RolesConfiguration());
 
     }
 
