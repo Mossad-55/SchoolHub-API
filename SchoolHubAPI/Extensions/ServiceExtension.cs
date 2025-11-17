@@ -94,4 +94,8 @@ public static class ServiceExtension
     // Service Manager Configuration
     public static void ConfigureServiceManager(this IServiceCollection services) =>
         services.AddScoped<IServiceManager, ServiceManager>();
+
+    // Authentication Service Manager Configuration
+    public static void ConfigureAuthenticationManager(this IServiceCollection services) =>
+        services.AddScoped<IAuthenticationServiceManager, AuthenticationServiceManager>();
 }

@@ -9,7 +9,6 @@ using SchoolHubAPI.Entities.Exceptions;
 using SchoolHubAPI.Service.Contracts;
 using SchoolHubAPI.Shared.DTOs.User;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
@@ -107,7 +106,8 @@ internal sealed class AuthenticationService : IAuthenticationService
         {
             var errors = string.Join("; ", updateResult.Errors.Select(e => e.Description));
             _logger.LogError($"Failed to update user {_user.Id} with refresh token. Errors: {errors}");
-            // let caller handle; do not swallow
+
+            throw new InvalidRefreshTokenException();
         }
         else
         {

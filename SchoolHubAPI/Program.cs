@@ -14,6 +14,7 @@ builder.Services.AddJwtConfigurationClass(builder.Configuration);
 builder.Services.ConfigureRepositoryManager();
 builder.Services.ConfigureLoggerService();
 builder.Services.AddAutoMapper(typeof(Program));
+builder.Services.ConfigureServiceManager();
 
 builder.Services.AddScoped<ValidationFilterAttribute>();
 builder.Services.AddControllers(config =>
