@@ -6,7 +6,7 @@ namespace SchoolHubAPI.Service.Contracts;
 public interface IAuthenticationService
 {
     Task<IdentityResult> RegisterUserAsync(UserRegisterationDto registerDto);
-    Task<IdentityResult> UpdateUserAsync(UserUpdateDto updateDto);
+    Task<IdentityResult> UpdateUserAsync(Guid userId, UserUpdateDto updateDto);
     Task<LoginResponseDto> LoginUserAsync(LoginUserDto loginDto);
     Task<TokenDto> GenerateTokenAsync(bool populateExpiry);
     Task<TokenDto> GenerateRefreshTokenAsync(TokenDto tokenDto);
