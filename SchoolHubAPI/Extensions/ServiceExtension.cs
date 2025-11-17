@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using FluentValidation;
+using FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -9,6 +11,7 @@ using SchoolHubAPI.LoggerService;
 using SchoolHubAPI.Repository;
 using SchoolHubAPI.Service;
 using SchoolHubAPI.Service.Contracts;
+using SchoolHubAPI.Shared.Validators;
 using System.Text;
 
 namespace SchoolHubAPI.Extensions;
@@ -98,4 +101,16 @@ public static class ServiceExtension
     // Authentication Service Manager Configuration
     public static void ConfigureAuthenticationManager(this IServiceCollection services) =>
         services.AddScoped<IAuthenticationServiceManager, AuthenticationServiceManager>();
+
+    // Validators Configuration
+    public static void ConfigureValidators(this IServiceCollection services)
+    {
+        services.AddFluentValidationAutoValidation();
+
+        // Register all the validators
+        services.AddValidatorsFromAssemblyContaining<LoginUserDtoValidator>();
+        services.AddValidatorsFromAssemblyContaining<UserUpdateDtoValidator>();
+        services.AddValidatorsFromAssemblyContaining<UserRegisterationDtoValidator>();
+        services.AddValidatorsFromAssemblyContaining<TokenDtoValidator>();
+    }
 }
