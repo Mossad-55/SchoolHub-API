@@ -80,4 +80,27 @@ public static class RepositoryExtensions
 
         return students.OrderBy(orderQuery);
     }
+
+    // Department search & sort
+    public static IQueryable<Department> Search(this IQueryable<Department> departments, string searchTerm)
+    {
+        if (string.IsNullOrWhiteSpace(searchTerm))
+            return departments;
+
+        var lowerCaseTerm = searchTerm.Trim().ToLower();
+
+        return departments.Where(d => d.Name != null && d.Name.ToLower().Contains(lowerCaseTerm));
+    }
+
+    public static IQueryable<Department> Sort(this IQueryable<Department> departments, string orderByQueryString)
+    {
+        if (string.IsNullOrWhiteSpace(orderByQueryString))
+            return departments.OrderBy(d => d.Name);
+
+        var orderQuery = OrderQueryBuilder.CreateOrderQuery<Department>(orderByQueryString);
+        if (string.IsNullOrWhiteSpace(orderQuery))
+            return departments.OrderBy(d => d.Name);
+
+        return departments.OrderBy(orderQuery);
+    }
 }
