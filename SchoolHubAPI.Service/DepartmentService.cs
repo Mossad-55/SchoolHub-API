@@ -32,7 +32,7 @@ internal sealed class DepartmentService : IDepartmentService
         _logger.LogInfo($"Creating department '{creationDto.Name}'");
 
         // Check if department exists
-        if (!await _repository.Department.ChechIfDepatmentExists(creationDto.Name!.Trim().ToUpperInvariant(), trackChanges))
+        if (await _repository.Department.ChechIfDepatmentExists(creationDto.Name!.Trim().ToUpperInvariant(), trackChanges))
         {
             _logger.LogWarn($"Department creation failed: department '{creationDto.Name}' already exists");
             throw new DepartmentExistsException(creationDto.Name);
@@ -96,7 +96,7 @@ internal sealed class DepartmentService : IDepartmentService
         var departmentEntity = await GetDepartment(id, trackChanges);
 
         // Check if department exists
-        if (!await _repository.Department.ChechIfDepatmentExists(updateDto.Name!.Trim().ToUpperInvariant(), trackChanges))
+        if (await _repository.Department.ChechIfDepatmentExists(updateDto.Name!.Trim().ToUpperInvariant(), trackChanges) && updateDto.Name != departmentEntity.Name)
         {
             _logger.LogWarn($"Department update failed: department '{updateDto.Name}' already exists");
             throw new DepartmentExistsException(updateDto.Name);

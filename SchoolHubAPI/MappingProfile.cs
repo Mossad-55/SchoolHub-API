@@ -55,10 +55,8 @@ public class MappingProfile : Profile
         // User Mapping for registration/update
         CreateMap<UserRegisterationDto, User>()
             .ForMember(u => u.UserName,
-                opts => opts.MapFrom(x => x.Name!.Replace(" ", "")));
-        CreateMap<UserUpdateDto, User>()
-            .ForMember(u => u.UserName,
-                opts => opts.MapFrom(x => x.Name!.Replace(" ", "")));
+                opts => opts.MapFrom(x => x.Email));
+        CreateMap<UserUpdateDto, User>();
 
         // Department Mapping
         CreateMap<Department, DepartmentDto>()

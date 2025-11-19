@@ -46,7 +46,7 @@ public class DepartmentsController : ControllerBase
     [ServiceFilter(typeof(ValidationFilterAttribute))]
     public async Task<IActionResult> UpdateDepartment(Guid id, [FromBody] DepartmentForUpdateDto updateDto)
     {
-        await _service.DepartmentService.UpdateAsync(id, updateDto, false);
+        await _service.DepartmentService.UpdateAsync(id, updateDto, true);
 
         return NoContent();
     }
