@@ -1,7 +1,7 @@
 ﻿using FluentValidation;
 using SchoolHubAPI.Shared.DTOs.User;
 
-namespace SchoolHubAPI.Shared.Validators;
+namespace SchoolHubAPI.Shared.Validators.User;
 
 public class UserUpdateDtoValidator : AbstractValidator<UserUpdateDto>
 {
@@ -19,7 +19,6 @@ public class UserUpdateDtoValidator : AbstractValidator<UserUpdateDto>
             .When(x => !string.IsNullOrWhiteSpace(x.PhoneNumber))
             .WithMessage("Phone number must contain only digits, may start with '+', and be 7-15 characters long.");
 
-        // UpdatedDate: optional, cannot be in the future
         RuleFor(x => x.UpdatedDate)
             .LessThanOrEqualTo(DateTime.UtcNow)
             .When(x => x.UpdatedDate.HasValue)

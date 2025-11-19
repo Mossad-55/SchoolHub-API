@@ -2,7 +2,7 @@
 using FluentValidation;
 using SchoolHubAPI.Shared.DTOs.User;
 
-namespace SchoolHubAPI.Shared.Validators;
+namespace SchoolHubAPI.Shared.Validators.User;
 
 public class TokenDtoValidator : AbstractValidator<TokenDto>
 {
