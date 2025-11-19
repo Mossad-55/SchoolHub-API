@@ -27,7 +27,7 @@ internal sealed class DepartmentService : IDepartmentService
         _logger = logger;
     }
 
-    public async Task CreateAsync(DepartmentForCreationDto creationDto, bool trackChanges)
+    public async Task<DepartmentDto?> CreateAsync(DepartmentForCreationDto creationDto, bool trackChanges)
     {
         _logger.LogInfo($"Creating department '{creationDto.Name}'");
 
@@ -47,6 +47,8 @@ internal sealed class DepartmentService : IDepartmentService
         await _repository.SaveChangesAsync();
 
         _logger.LogInfo($"Department '{departmentEntity.Name}' created (Id: {departmentEntity.Id})");
+
+        return _mapper.Map<DepartmentDto>(departmentEntity);
     }
 
     public async Task DeleteAsync(Guid id, bool trackChanges)
