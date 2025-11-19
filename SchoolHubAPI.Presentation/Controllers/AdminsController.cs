@@ -30,6 +30,4 @@ public class AdminsController : ControllerBase
 
         return Ok(adminDto);
     }
-
-
 }
