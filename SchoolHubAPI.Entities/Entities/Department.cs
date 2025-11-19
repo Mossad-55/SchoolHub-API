@@ -10,7 +10,7 @@ public class Department
     public string? Name { get; set; }
     public string? Description { get; set; }
     public DateTime? CreatedDate { get; set; }
-    public DateTime? UpdateDate { get; set; }
+    public DateTime? UpdatedDate { get; set; }
 
     public Guid? HeadOfDepartmentId { get; set; }
     [ForeignKey("HeadOfDepartmentId")]
