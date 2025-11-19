@@ -4,6 +4,7 @@ using SchoolHubAPI.Entities.Entities;
 using SchoolHubAPI.Entities.Exceptions;
 using SchoolHubAPI.Service.Contracts;
 using SchoolHubAPI.Shared.DTOs.Student;
+using SchoolHubAPI.Shared.RequestFeatures;
 
 namespace SchoolHubAPI.Service;
 
@@ -36,17 +37,17 @@ internal sealed class StudentService : IStudentService
         _logger.LogInfo($"Student created for user {userId}");
     }
 
-    public async Task<IEnumerable<StudentDto>>? GetAllAsync(bool trackChanges)
+    public async Task<(IEnumerable<StudentDto> StudentDtos, MetaData MetaData)> GetAllAsync(RequestParameters requestParameters, bool trackChanges)
     {
         _logger.LogDebug($"Fetching all students (trackChanges={trackChanges})");
 
-        var studentEntities = await _repository.Student.GetAllStudentsAsync(trackChanges)!;
+        var studentEntitiesWithMetaData = await _repository.Student.GetAllStudentsAsync(requestParameters, trackChanges)!;
 
-        var studentDtos = _mapper.Map<IEnumerable<StudentDto>>(studentEntities);
+        var studentDtos = _mapper.Map<IEnumerable<StudentDto>>(studentEntitiesWithMetaData);
 
-        _logger.LogInfo($"Fetched {studentEntities?.Count ?? 0} students");
+        _logger.LogInfo($"Fetched {studentDtos?.Count() ?? 0} students");
 
-        return studentDtos;
+        return (studentDtos, studentEntitiesWithMetaData.MetaData)!;
     }
 
     public async Task<StudentDto?> GetByIdAsync(Guid id, bool trackChanges)
