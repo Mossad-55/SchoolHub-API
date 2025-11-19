@@ -1,6 +1,6 @@
 ﻿namespace SchoolHubAPI.Shared.RequestFeatures;
 
-public abstract class RequestParameters
+public class RequestParameters
 { 
     const int maxPageSize = 50;
     public int PageNumber { get; set; } = 1; // Default page number

@@ -37,7 +37,7 @@ internal sealed class AdminService : IAdminService
         _logger.LogInfo($"Admin created for user {userId}");
     }
 
-    public async Task<(IEnumerable<AdminDto>, MetaData)>? GetAllAsync(RequestParameters requestParameters, bool trackChanges)
+    public async Task<(IEnumerable<AdminDto> AdminDtos, MetaData MetaData)> GetAllAsync(RequestParameters requestParameters, bool trackChanges)
     {
         _logger.LogDebug($"Fetching all admins (trackChanges={trackChanges})");
 
