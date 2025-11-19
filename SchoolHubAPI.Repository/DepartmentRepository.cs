@@ -13,6 +13,10 @@ internal sealed class DepartmentRepository : RepositoryBase<Department>, IDepart
     {
     }
 
+    public async Task<bool> ChechIfDepatmentExists(string name, bool trackChanges) =>
+        await FindByCondition(d => d.Name == name, trackChanges)
+        .SingleOrDefaultAsync() != null;
+
     public void CreateDepartment(Department department) => Create(department);
 
     public void DeleteDepartment(Department department) => Delete(department);

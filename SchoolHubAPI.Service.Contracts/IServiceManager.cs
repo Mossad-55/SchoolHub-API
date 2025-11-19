@@ -5,4 +5,5 @@ public interface IServiceManager
     IAdminService AdminService { get; }
     ITeacherService TeacherService { get; }
     IStudentService StudentService { get; }
+    IDepartmentService DepartmentService { get; }
 }

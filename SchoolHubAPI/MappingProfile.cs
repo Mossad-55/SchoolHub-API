@@ -1,6 +1,8 @@
-﻿using AutoMapper;
+﻿using System;
+using AutoMapper;
 using SchoolHubAPI.Entities.Entities;
 using SchoolHubAPI.Shared.DTOs.Admin;
+using SchoolHubAPI.Shared.DTOs.Department;
 using SchoolHubAPI.Shared.DTOs.Student;
 using SchoolHubAPI.Shared.DTOs.Teacher;
 using SchoolHubAPI.Shared.DTOs.User;
@@ -57,6 +59,20 @@ public class MappingProfile : Profile
         CreateMap<UserUpdateDto, User>()
             .ForMember(u => u.UserName,
                 opts => opts.MapFrom(x => x.Name!.Replace(" ", "")));
+
+        // Department Mapping
+        CreateMap<Department, DepartmentDto>()
+            .ForMember(d => d.CreatedDate, 
+                opts => opts.MapFrom(src => FormatDate(src.CreatedDate)))
+            .ForMember(d => d.UpdatedDate, 
+                opts => opts.MapFrom(src => FormatDate(src.UpdatedDate)))
+            .ForMember(d => d.HeadOfDepartmentName,
+                opts => opts.MapFrom(src =>
+                    src.HeadOfDepartment != null && src.HeadOfDepartment.User != null
+                        ? src.HeadOfDepartment.User.Name
+                        : string.Empty));
+        CreateMap<DepartmentForCreationDto, Department>();
+        CreateMap<DepartmentForUpdateDto, Department>();
     }
 
     private static string FormatDate(DateTime? dt) =>

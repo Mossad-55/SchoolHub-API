@@ -7,6 +7,7 @@ public interface IDepartmentRepository
 {
     Task<PagedList<Department>>? GetAllDepartmentsAsync(RequestParameters requestParameters, bool trackChanges);
     Task<Department?> GetDepartmentAsync(Guid id, bool trackChanges);
+    Task<bool> ChechIfDepatmentExists(string name, bool trackChanges);
     void DeleteDepartment(Department department);
     void CreateDepartment(Department department);
     void UpdateDepartment(Department department);
