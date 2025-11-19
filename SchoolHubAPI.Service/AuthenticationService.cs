@@ -51,6 +51,8 @@ internal sealed class AuthenticationService : IAuthenticationService
             throw new UserNotFoundException(userId);
         }
 
+        // Before Deleting if the User is a Teacher Chech first if he is a head of department if yes, don't allow it if no delete.
+
         var result = await _userManager.DeleteAsync(user);
         if (!result.Succeeded)
         {
