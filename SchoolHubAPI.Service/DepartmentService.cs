@@ -32,7 +32,7 @@ internal sealed class DepartmentService : IDepartmentService
         _logger.LogInfo($"Creating department '{creationDto.Name}'");
 
         // Check if department exists
-        if (await _repository.Department.ChechIfDepatmentExists(creationDto.Name!.Trim().ToUpperInvariant(), trackChanges))
+        if (await _repository.Department.CheckIfDepatmentExists(creationDto.Name!.Trim().ToUpperInvariant(), trackChanges))
         {
             _logger.LogWarn($"Department creation failed: department '{creationDto.Name}' already exists");
             throw new DepartmentExistsException(creationDto.Name);
@@ -89,6 +89,9 @@ internal sealed class DepartmentService : IDepartmentService
         return departmentDto;
     }
 
+    public async Task<bool> IsTeacherHeadOfDepartment(Guid teacherId, bool trackChanges) => 
+        await _repository.Department.CheckIfTeacherIsHeadOfDepartment(teacherId, trackChanges);
+
     public async Task UpdateAsync(Guid id, DepartmentForUpdateDto updateDto, bool trackChanges)
     {
         _logger.LogInfo($"Updating department {id}");
@@ -96,7 +99,7 @@ internal sealed class DepartmentService : IDepartmentService
         var departmentEntity = await GetDepartment(id, trackChanges);
 
         // Check if department exists
-        if (await _repository.Department.ChechIfDepatmentExists(updateDto.Name!.Trim().ToUpperInvariant(), trackChanges) && updateDto.Name != departmentEntity.Name)
+        if (await _repository.Department.CheckIfDepatmentExists(updateDto.Name!.Trim().ToUpperInvariant(), trackChanges) && updateDto.Name != departmentEntity.Name)
         {
             _logger.LogWarn($"Department update failed: department '{updateDto.Name}' already exists");
             throw new DepartmentExistsException(updateDto.Name);

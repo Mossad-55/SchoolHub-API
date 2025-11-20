@@ -7,6 +7,7 @@ using SchoolHubAPI.Entities.ConfigurationModels;
 using SchoolHubAPI.Entities.Entities;
 using SchoolHubAPI.Entities.Exceptions;
 using SchoolHubAPI.Service.Contracts;
+using SchoolHubAPI.Shared;
 using SchoolHubAPI.Shared.DTOs.User;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -51,7 +52,13 @@ internal sealed class AuthenticationService : IAuthenticationService
             throw new UserNotFoundException(userId);
         }
 
-        // Before Deleting if the User is a Teacher Chech first if he is a head of department if yes, don't allow it if no delete.
+        // Check is the role is Teacher and if they are Head of Department.
+        if (await _userManager.IsInRoleAsync(user, RolesEnum.Teacher.ToString()) 
+            && await _serviceManager.DepartmentService.IsTeacherHeadOfDepartment(userId, trackChanges: false))
+        {
+            _logger.LogWarn($"Failed to delete user {userId}. Head of Department.");
+            throw new RemoveHeadOfDepartmentException(userId);
+        }
 
         var result = await _userManager.DeleteAsync(user);
         if (!result.Succeeded)

@@ -13,8 +13,12 @@ internal sealed class DepartmentRepository : RepositoryBase<Department>, IDepart
     {
     }
 
-    public async Task<bool> ChechIfDepatmentExists(string name, bool trackChanges) =>
+    public async Task<bool> CheckIfDepatmentExists(string name, bool trackChanges) =>
         await FindByCondition(d => d.Name == name, trackChanges)
+        .SingleOrDefaultAsync() != null;
+
+    public async Task<bool> CheckIfTeacherIsHeadOfDepartment(Guid teacherId, bool trackChanges) =>
+        await FindByCondition(d => d.HeadOfDepartmentId == teacherId, trackChanges)
         .SingleOrDefaultAsync() != null;
 
     public void CreateDepartment(Department department) => Create(department);

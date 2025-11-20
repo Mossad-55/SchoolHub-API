@@ -10,4 +10,5 @@ public interface IDepartmentService
     Task<DepartmentDto?> CreateAsync(DepartmentForCreationDto creationDto, bool trackChanges);
     Task UpdateAsync(Guid id, DepartmentForUpdateDto updateDto, bool trackChanges);
     Task DeleteAsync(Guid id, bool trackChanges);
+    Task<bool> IsTeacherHeadOfDepartment(Guid teacherId, bool trackChanges);
 }

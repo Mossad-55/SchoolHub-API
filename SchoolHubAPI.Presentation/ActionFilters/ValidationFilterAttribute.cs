@@ -31,10 +31,10 @@ public class ValidationFilterAttribute : IActionFilter
         if (!context.ModelState.IsValid)
         {
             var errors = context.ModelState
-                .Where(x => x.Value.Errors.Count > 0)
+                .Where(x => x.Value!.Errors.Count > 0)
                 .ToDictionary(
                     kvp => kvp.Key,
-                    kvp => kvp.Value.Errors.Select(e => e.ErrorMessage).ToArray()
+                    kvp => kvp.Value!.Errors.Select(e => e.ErrorMessage).ToArray()
                 );
 
             context.Result = new BadRequestObjectResult(new { errors });
