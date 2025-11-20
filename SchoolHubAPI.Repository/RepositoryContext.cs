@@ -17,6 +17,10 @@ public class RepositoryContext : IdentityDbContext<User, IdentityRole<Guid>, Gui
     {
         base.OnModelCreating(modelBuilder);
 
+        modelBuilder.Entity<Course>()
+            .HasIndex(c => new { c.DepartmentId, c.Code })
+            .IsUnique();
+
         // Add Configuration Data and Roles.
         modelBuilder.ApplyConfiguration(new RolesConfiguration());
 
@@ -27,4 +31,5 @@ public class RepositoryContext : IdentityDbContext<User, IdentityRole<Guid>, Gui
     public DbSet<Teacher>? Teachers { get; set; }
     public DbSet<Student>? Students { get; set; }
     public DbSet<Department>? Departments { get; set; }
+    public DbSet<Course>? Courses { get; set; }
 }

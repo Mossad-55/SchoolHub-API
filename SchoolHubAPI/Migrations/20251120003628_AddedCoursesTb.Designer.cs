@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SchoolHubAPI.Repository;
 
@@ -11,9 +12,11 @@ using SchoolHubAPI.Repository;
 namespace SchoolHubAPI.Migrations
 {
     [DbContext(typeof(RepositoryContext))]
-    partial class RepositoryContextModelSnapshot : ModelSnapshot
+    [Migration("20251120003628_AddedCoursesTb")]
+    partial class AddedCoursesTb
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -190,7 +193,7 @@ namespace SchoolHubAPI.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Code")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("CreatedDate")
                         .HasColumnType("datetime2");
@@ -212,9 +215,7 @@ namespace SchoolHubAPI.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("DepartmentId", "Code")
-                        .IsUnique()
-                        .HasFilter("[Code] IS NOT NULL");
+                    b.HasIndex("DepartmentId");
 
                     b.ToTable("Courses");
                 });
