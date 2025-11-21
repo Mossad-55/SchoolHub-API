@@ -2,6 +2,7 @@
 using AutoMapper;
 using SchoolHubAPI.Entities.Entities;
 using SchoolHubAPI.Shared.DTOs.Admin;
+using SchoolHubAPI.Shared.DTOs.Course;
 using SchoolHubAPI.Shared.DTOs.Department;
 using SchoolHubAPI.Shared.DTOs.Student;
 using SchoolHubAPI.Shared.DTOs.Teacher;
@@ -71,6 +72,15 @@ public class MappingProfile : Profile
                         : string.Empty));
         CreateMap<DepartmentForCreationDto, Department>();
         CreateMap<DepartmentForUpdateDto, Department>();
+
+        // Course Mapping
+        CreateMap<Course, CourseDto>()
+            .ForMember(c => c.CreatedDate,
+                opts => opts.MapFrom(src => FormatDate(src.CreatedDate)))
+            .ForMember(c => c.UpdatedDate,
+                opts => opts.MapFrom(src => FormatDate(src.UpdatedDate)));
+        CreateMap<CourseForCreationDto, Course>();
+        CreateMap<CourseForUpdateDto, Course>();
     }
 
     private static string FormatDate(DateTime? dt) =>
