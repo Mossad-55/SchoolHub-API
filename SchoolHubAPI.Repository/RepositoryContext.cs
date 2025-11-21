@@ -32,4 +32,5 @@ public class RepositoryContext : IdentityDbContext<User, IdentityRole<Guid>, Gui
     public DbSet<Student>? Students { get; set; }
     public DbSet<Department>? Departments { get; set; }
     public DbSet<Course>? Courses { get; set; }
+    public DbSet<Batch>? Batches { get; set; }
 }

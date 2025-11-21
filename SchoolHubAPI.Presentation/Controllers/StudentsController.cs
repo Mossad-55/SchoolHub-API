@@ -7,11 +7,11 @@ namespace SchoolHubAPI.Presentation.Controllers;
 
 [Route("api/students")]
 [ApiController]
-public class StudentsConotroller : ControllerBase
+public class StudentsController : ControllerBase
 {
     private readonly IServiceManager _service;
 
-    public StudentsConotroller(IServiceManager service) => _service = service;
+    public StudentsController(IServiceManager service) => _service = service;
 
     [HttpGet]
     public async Task<IActionResult> GetStudents([FromQuery] RequestParameters requestParameters)
