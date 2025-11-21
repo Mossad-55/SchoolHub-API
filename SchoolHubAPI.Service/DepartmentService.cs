@@ -99,7 +99,8 @@ internal sealed class DepartmentService : IDepartmentService
         var departmentEntity = await GetDepartment(id, trackChanges);
 
         // Check if department exists
-        if (await _repository.Department.CheckIfDepatmentExists(updateDto.Name!.Trim().ToUpperInvariant(), trackChanges) && updateDto.Name != departmentEntity.Name)
+        if (await _repository.Department.CheckIfDepatmentExists(updateDto.Name!.Trim().ToUpperInvariant(), trackChanges) 
+            && updateDto.Name != departmentEntity.Name)
         {
             _logger.LogWarn($"Department update failed: department '{updateDto.Name}' already exists");
             throw new DepartmentExistsException(updateDto.Name);

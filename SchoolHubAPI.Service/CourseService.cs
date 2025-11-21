@@ -1,0 +1,144 @@
+﻿using AutoMapper;
+using SchoolHubAPI.Contracts;
+using SchoolHubAPI.Entities.Entities;
+using SchoolHubAPI.Entities.Exceptions;
+using SchoolHubAPI.Service.Contracts;
+using SchoolHubAPI.Shared.DTOs.Course;
+using SchoolHubAPI.Shared.RequestFeatures;
+
+namespace SchoolHubAPI.Service;
+
+internal sealed class CourseService : ICourseService
+{
+    private readonly IRepositoryManager _repository;
+    private readonly IMapper _mapper;
+    private readonly ILoggerManager _logger;
+
+    public CourseService(IRepositoryManager repository, IMapper mapper, ILoggerManager logger)
+    {
+        _repository = repository;
+        _mapper = mapper;
+        _logger = logger;
+    }
+
+    public async Task<CourseDto?> CreateAsync(CourseForCreationDto creationDto, bool trackChanges)
+    {
+        _logger.LogInfo($"Creating course in department {creationDto.DepartmentId}.");
+
+        await EnsureDepartmentExistsAsync(creationDto.DepartmentId, trackChanges);
+
+        var normalizedCode = creationDto.Code?.Trim().ToUpperInvariant() ?? string.Empty;
+        await EnsureCourseCodeIsUniqueAsync(creationDto.DepartmentId, normalizedCode, trackChanges);
+
+        var courseEntity = _mapper.Map<Course>(creationDto);
+
+        _repository.Course.CreateCourse(courseEntity);
+        await _repository.SaveChangesAsync();
+
+        _logger.LogInfo($"Course created with id: {courseEntity.Id} in department {creationDto.DepartmentId}.");
+
+        return _mapper.Map<CourseDto>(courseEntity);
+    }
+
+    public async Task DeleteAsync(Guid departmentId, Guid id, bool trackChanges)
+    {
+        _logger.LogInfo($"Deleting course {id} from department {departmentId}.");
+
+        await EnsureDepartmentExistsAsync(departmentId, trackChanges);
+
+        var courseEntity = await GetCourseForDepartment(departmentId, id, trackChanges);
+
+        _repository.Course.DeleteCourse(courseEntity);
+        await _repository.SaveChangesAsync();
+
+        _logger.LogInfo($"Course {id} deleted from department {departmentId}.");
+    }
+
+    public async Task<(IEnumerable<CourseDto> CourseDtos, MetaData MetaData)> GetAllAsync(Guid departmentId, RequestParameters requestParameters, bool trackChanges)
+    {
+        _logger.LogInfo($"Retrieving courses for department {departmentId} - page {requestParameters.PageNumber}, size {requestParameters.PageSize}.");
+
+        await EnsureDepartmentExistsAsync(departmentId, trackChanges);
+
+        var courseEntitiesWithMetaData = await _repository.Course.GetAllCoursesAsync(departmentId, requestParameters, trackChanges)!;
+
+        var courseDtos = _mapper.Map<IEnumerable<CourseDto>>(courseEntitiesWithMetaData);
+
+        return (courseDtos, courseEntitiesWithMetaData.MetaData)!;
+    }
+
+    public async Task<CourseDto?> GetByIdForDepartmentAsync(Guid departmentId, Guid id, bool trackChanges)
+    {
+        _logger.LogInfo($"Retrieving course {id} from department {departmentId}.");
+
+        await EnsureDepartmentExistsAsync(departmentId, trackChanges);
+
+        var courseEntity = await GetCourseForDepartment(departmentId, id, trackChanges);
+
+        var courseDto = _mapper.Map<CourseDto>(courseEntity);
+
+        _logger.LogDebug($"Course {id} mapped to DTO for department {departmentId}.");
+
+        return courseDto;
+    }
+
+    public async Task UpdateAsync(Guid departmentId, Guid id, CourseForUpdateDto updateDto, bool trackChanges)
+    {
+        _logger.LogInfo($"Updating course {id} in department {departmentId}.");
+
+        await EnsureDepartmentExistsAsync(departmentId, trackChanges: false);
+
+        var courseEntity = await GetCourseForDepartment(departmentId, id, trackChanges);
+
+        var normalizedCode = updateDto.Code?.Trim().ToUpperInvariant()!;
+        await EnsureCourseCodeIsUniqueAsync(updateDto.DepartmentId, normalizedCode, trackChanges, currentCode: courseEntity.Code);
+
+        _mapper.Map(updateDto, courseEntity);
+
+        await _repository.SaveChangesAsync();
+
+        _logger.LogInfo($"Course {id} updated in department {departmentId}.");
+    }
+
+    // Private Functions
+
+    private async Task EnsureDepartmentExistsAsync(Guid departmentId, bool trackChanges)
+    {
+        var department = await _repository.Department.GetDepartmentAsync(departmentId, trackChanges);
+        if (department is null)
+        {
+            _logger.LogWarn($"Department with id: {departmentId} not found.");
+            throw new DepartmentNotFoundException(departmentId);
+        }
+
+        _logger.LogDebug($"Department with id: {departmentId} exists.");
+    }
+
+    private async Task<Course> GetCourseForDepartment(Guid departmentId, Guid id, bool trackChanges)
+    {
+        var courseEntity = await _repository.Course.GetCourseForDepartmentAsync(departmentId, id, trackChanges);
+        if (courseEntity is null)
+        {
+            _logger.LogWarn($"Course with id: {id} in department {departmentId} not found.");
+            throw new CourseNotFoundException(id);
+        }
+
+        _logger.LogDebug($"Course with id: {id} retrieved for department {departmentId}.");
+        return courseEntity;
+    }
+
+    private async Task EnsureCourseCodeIsUniqueAsync(Guid departmentId, string code, bool trackChanges, string? currentCode = null)
+    {
+        if (string.IsNullOrWhiteSpace(code))
+            return;
+
+        if (await _repository.Course.CheckIfCourseExists(departmentId, code, trackChanges)
+            && !string.Equals(code, currentCode, StringComparison.OrdinalIgnoreCase))
+        {
+            _logger.LogWarn($"Course with code '{code}' already exists in department {departmentId}.");
+            throw new CourseExistsException(code);
+        }
+
+        _logger.LogDebug($"Course code '{code}' is unique in department {departmentId} or unchanged.");
+    }
+}

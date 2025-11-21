@@ -21,9 +21,9 @@ internal sealed class CourseRepository : RepositoryBase<Course>, ICourseReposito
 
     public void DeleteCourse(Course course) => Delete(course);
 
-    public async Task<PagedList<Course>>? GetAllCoursesAsync(RequestParameters requestParameters, bool trackChanges)
+    public async Task<PagedList<Course>>? GetAllCoursesAsync(Guid departmentId, RequestParameters requestParameters, bool trackChanges)
     {
-        var courses = await FindAll(trackChanges)
+        var courses = await FindByCondition(c => c.DepartmentId == departmentId, trackChanges)
             .Search(requestParameters.SearchTerm!)
             .Sort(requestParameters.OrderBy!)
             .ToListAsync();
@@ -31,7 +31,11 @@ internal sealed class CourseRepository : RepositoryBase<Course>, ICourseReposito
         return PagedList<Course>.ToPagedList(courses, requestParameters.PageNumber, requestParameters.PageSize);
     }
 
-    public async Task<Course?> GetCourseAsync(Guid id, bool trackChanges) =>
+    public async Task<Course?> GetCourseForDepartmentAsync(Guid departmentId, Guid id, bool trackChanges) =>
+        await FindByCondition(c => c.DepartmentId == departmentId && c.Id == id, trackChanges)
+        .SingleOrDefaultAsync();
+
+    public async Task<Course?> GetCourseByIdAsync(Guid id, bool trackChanges) =>
         await FindByCondition(c => c.Id == id, trackChanges)
         .SingleOrDefaultAsync();
 
