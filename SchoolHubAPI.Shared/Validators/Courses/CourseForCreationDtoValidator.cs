@@ -25,7 +25,5 @@ public class CourseForCreationDtoValidator : AbstractValidator<CourseForCreation
             .LessThanOrEqualTo(DateTime.UtcNow)
             .When(x => x.CreatedDate.HasValue)
             .WithMessage("CreatedDate cannot be in the future.");
-        RuleFor(x => x.DepartmentId)
-            .NotEqual(Guid.Empty).WithMessage("DepartmentId must be a valid non-empty GUID.");
     }
 }

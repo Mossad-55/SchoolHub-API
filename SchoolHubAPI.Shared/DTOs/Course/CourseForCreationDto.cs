@@ -7,5 +7,4 @@ public record CourseForCreationDto
     public string? Description { get; set; }
     public int Credits { get; set; }
     public DateTime? CreatedDate { get; set; } = DateTime.UtcNow;
-    public Guid DepartmentId { get; set; }
 }

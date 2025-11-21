@@ -9,6 +9,4 @@ public record CourseDto
     public int Credits { get; set; }
     public string? CreatedDate { get; set; }
     public string? UpdatedDate { get; set; }
-
-    public Guid DepartmentId { get; set; }
 }

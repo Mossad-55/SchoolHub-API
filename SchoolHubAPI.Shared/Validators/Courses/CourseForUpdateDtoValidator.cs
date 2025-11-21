@@ -25,7 +25,5 @@ public class CourseForUpdateDtoValidator : AbstractValidator<CourseForUpdateDto>
             .LessThanOrEqualTo(DateTime.UtcNow)
             .When(x => x.UpdatedDate.HasValue)
             .WithMessage("UpdatedDate cannot be in the future.");
-        RuleFor(x => x.DepartmentId)
-            .NotEqual(Guid.Empty).WithMessage("DepartmentId must be a valid non-empty GUID.");
     }
 }

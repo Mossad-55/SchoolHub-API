@@ -21,21 +21,22 @@ internal sealed class CourseService : ICourseService
         _logger = logger;
     }
 
-    public async Task<CourseDto?> CreateAsync(CourseForCreationDto creationDto, bool depTrackChanges, bool courseTrackChanges)
+    public async Task<CourseDto?> CreateAsync(Guid departmentId, CourseForCreationDto creationDto, bool depTrackChanges, bool courseTrackChanges)
     {
-        _logger.LogInfo($"Creating course in department {creationDto.DepartmentId}.");
+        _logger.LogInfo($"Creating course in department {departmentId}.");
 
-        await EnsureDepartmentExistsAsync(creationDto.DepartmentId, depTrackChanges);
+        await EnsureDepartmentExistsAsync(departmentId, depTrackChanges);
 
         var normalizedCode = creationDto.Code?.Trim().ToUpperInvariant() ?? string.Empty;
-        await EnsureCourseCodeIsUniqueAsync(creationDto.DepartmentId, normalizedCode, courseTrackChanges);
+        await EnsureCourseCodeIsUniqueAsync(departmentId, normalizedCode, courseTrackChanges);
 
         var courseEntity = _mapper.Map<Course>(creationDto);
+        courseEntity.DepartmentId = departmentId;
 
         _repository.Course.CreateCourse(courseEntity);
         await _repository.SaveChangesAsync();
 
-        _logger.LogInfo($"Course created with id: {courseEntity.Id} in department {creationDto.DepartmentId}.");
+        _logger.LogInfo($"Course created with id: {courseEntity.Id} in department {courseEntity.DepartmentId}.");
 
         return _mapper.Map<CourseDto>(courseEntity);
     }
@@ -91,7 +92,7 @@ internal sealed class CourseService : ICourseService
         var courseEntity = await GetCourseForDepartment(departmentId, id, courseTrackChanges);
 
         var normalizedCode = updateDto.Code?.Trim().ToUpperInvariant()!;
-        await EnsureCourseCodeIsUniqueAsync(updateDto.DepartmentId, normalizedCode, courseTrackChanges, currentCode: courseEntity.Code);
+        await EnsureCourseCodeIsUniqueAsync(departmentId, normalizedCode, courseTrackChanges, currentCode: courseEntity.Code);
 
         _mapper.Map(updateDto, courseEntity);
 
