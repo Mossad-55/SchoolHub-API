@@ -103,4 +103,29 @@ public static class RepositoryExtensions
 
         return departments.OrderBy(orderQuery);
     }
+
+    // Course search & sort
+    public static IQueryable<Course> Search(this IQueryable<Course> courses, string searchTerm)
+    {
+        if (string.IsNullOrWhiteSpace(searchTerm))
+            return courses;
+
+        var lowerCaseTerm = searchTerm.Trim().ToLower();
+
+        return courses.Where(c =>
+            (c.Name != null && c.Name.ToLower().Contains(lowerCaseTerm)) ||
+            (c.Code != null && c.Code.ToLower().Contains(lowerCaseTerm)));
+    }
+
+    public static IQueryable<Course> Sort(this IQueryable<Course> courses, string orderByQueryString)
+    {
+        if (string.IsNullOrWhiteSpace(orderByQueryString))
+            return courses.OrderBy(c => c.Name);
+
+        var orderQuery = OrderQueryBuilder.CreateOrderQuery<Course>(orderByQueryString);
+        if (string.IsNullOrWhiteSpace(orderQuery))
+            return courses.OrderBy(c => c.Name);
+
+        return courses.OrderBy(orderQuery);
+    }
 }
