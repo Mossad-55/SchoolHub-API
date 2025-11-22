@@ -11,6 +11,7 @@ using SchoolHubAPI.LoggerService;
 using SchoolHubAPI.Repository;
 using SchoolHubAPI.Service;
 using SchoolHubAPI.Service.Contracts;
+using SchoolHubAPI.Shared.Validators.Batch;
 using SchoolHubAPI.Shared.Validators.Courses;
 using SchoolHubAPI.Shared.Validators.Departments;
 using SchoolHubAPI.Shared.Validators.User;
@@ -118,5 +119,7 @@ public static class ServiceExtension
         services.AddValidatorsFromAssemblyContaining<DepartmentForUpdateDtoValidator>();
         services.AddValidatorsFromAssemblyContaining<CourseForCreationDtoValidator>();
         services.AddValidatorsFromAssemblyContaining<CourseForUpdateDtoValidator>();
+        services.AddValidatorsFromAssemblyContaining<BatchForUpdateDtoValidator>();
+        services.AddValidatorsFromAssemblyContaining<BatchForCreationDtoValidator>();
     }
 }
