@@ -87,7 +87,7 @@ internal sealed class CourseService : ICourseService
     {
         _logger.LogInfo($"Updating course {id} in department {departmentId}.");
 
-        await EnsureDepartmentExistsAsync(departmentId, trackChanges: false);
+        await EnsureDepartmentExistsAsync(departmentId, depTrackChanges);
 
         var courseEntity = await GetCourseForDepartment(departmentId, id, courseTrackChanges);
 
@@ -102,7 +102,6 @@ internal sealed class CourseService : ICourseService
     }
 
     // Private Functions
-
     private async Task EnsureDepartmentExistsAsync(Guid departmentId, bool trackChanges)
     {
         var department = await _repository.Department.GetDepartmentAsync(departmentId, trackChanges);
