@@ -25,7 +25,7 @@ public class CoursesController : ControllerBase
         return Ok(result.CourseDtos);
     }
 
-    [HttpGet("{id:guid}")]
+    [HttpGet("{id:guid}", Name = "CourseById")]
     public async Task<IActionResult> GetCourse(Guid departmentId, Guid id)
     {
         var courseDto = await _service.CourseService.GetByIdForDepartmentAsync(departmentId, id, depTrackChanges: false, courseTrackChanges: false);
@@ -39,7 +39,7 @@ public class CoursesController : ControllerBase
     {
         var courseDto = await _service.CourseService.CreateAsync(departmentId, creationDto, depTrackChanges: false, courseTrackChanges: false);
 
-        return CreatedAtAction(nameof(GetCourse), new { departmentId, id = courseDto!.Id }, courseDto);
+        return CreatedAtAction("CourseById", new { departmentId, id = courseDto!.Id }, courseDto);
     }
 
     [HttpPut("{id:guid}")]
