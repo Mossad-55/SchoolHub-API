@@ -8,6 +8,7 @@ public interface IRepositoryManager
     IStudentRepository Student { get; }
     IDepartmentRepository Department { get; }
     ICourseRepository Course { get; }
+    IBatchRepsitory Batch { get; }
 
     // Shared Methods.
     Task SaveChangesAsync();

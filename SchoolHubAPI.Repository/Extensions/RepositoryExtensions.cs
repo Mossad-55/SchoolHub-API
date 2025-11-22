@@ -128,4 +128,28 @@ public static class RepositoryExtensions
 
         return courses.OrderBy(orderQuery);
     }
+
+    // Batch search & sort
+    public static IQueryable<Batch> Search(this IQueryable<Batch> batches, string searchTerm)
+    {
+        if (string.IsNullOrWhiteSpace(searchTerm))
+            return batches;
+
+        var lowerCaseTerm = searchTerm.Trim().ToLower();
+
+        return batches.Where(b =>
+            b.Name != null && b.Name.ToLower().Contains(lowerCaseTerm));
+    }
+
+    public static IQueryable<Batch> Sort(this IQueryable<Batch> batches, string orderByQueryString)
+    {
+        if (string.IsNullOrWhiteSpace(orderByQueryString))
+            return batches.OrderBy(b => b.Name);
+
+        var orderQuery = OrderQueryBuilder.CreateOrderQuery<Batch>(orderByQueryString);
+        if (string.IsNullOrWhiteSpace(orderQuery))
+            return batches.OrderBy(b => b.Name);
+
+        return batches.OrderBy(orderQuery);
+    }
 }
