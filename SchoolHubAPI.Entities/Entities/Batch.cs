@@ -22,5 +22,5 @@ public class Batch
     public Course? Course { get; set; }
     [ForeignKey("TeacherId")]
     public Teacher? Teacher { get; set; }
-    // Remember to put navigation property for students enrollment.
+    public ICollection<StudentBatch>? StudentBatches { get; set; }
 }
