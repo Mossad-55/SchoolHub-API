@@ -20,9 +20,9 @@ builder.Services.AddAutoMapper(typeof(Program));
 builder.Services.ConfigureServiceManager();
 builder.Services.ConfigureAuthenticationManager();
 builder.Services.ConfigureValidators();
+builder.Services.ConfigureSwagger();
 
 builder.Services.AddScoped<ValidationFilterAttribute>();
-builder.Services.AddSwaggerGen();
 builder.Services.AddControllers(config =>
 {
     config.RespectBrowserAcceptHeader = true; // Accept header support
@@ -30,7 +30,6 @@ builder.Services.AddControllers(config =>
 }).AddApplicationPart(typeof(SchoolHubAPI.Presentation.AssemblyReference).Assembly);
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 
 builder.Services.Configure<ApiBehaviorOptions>(options =>
 {
@@ -46,7 +45,10 @@ app.ConfigureExceptionHandler(logger);
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(s =>
+    {
+        s.SwaggerEndpoint("swagger/v1/swagger.json", "School Hub API v1");
+    });
 }
 
 if (app.Environment.IsProduction())

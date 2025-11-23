@@ -8,6 +8,7 @@ namespace SchoolHubAPI.Presentation.Controllers;
 
 [Route("api/auth")]
 [ApiController]
+[ApiExplorerSettings(GroupName = "v1")]
 public class AuthenticationController : ControllerBase
 {
     private readonly IAuthenticationServiceManager _authService;

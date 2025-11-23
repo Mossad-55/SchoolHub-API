@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using SchoolHubAPI.Contracts;
 using SchoolHubAPI.Entities.ConfigurationModels;
 using SchoolHubAPI.Entities.Entities;
@@ -104,6 +105,55 @@ public static class ServiceExtension
     // Authentication Service Manager Configuration
     public static void ConfigureAuthenticationManager(this IServiceCollection services) =>
         services.AddScoped<IAuthenticationServiceManager, AuthenticationServiceManager>();
+
+    // Swagger Configuration
+    public static void ConfigureSwagger(this IServiceCollection services)
+    {
+        services.AddSwaggerGen(s =>
+        {
+            s.SwaggerDoc("v1", new OpenApiInfo
+            {
+                Title = "School Hub API",
+                Version = "v1",
+                Description = "This is backend API using .NET Core Web API to manage students, teachers, courses, classes, attendance, and grading with role-based access.",
+                Contact = new OpenApiContact
+                {
+                    Name = "Mossad Ahmed",
+                    Email = "mosad55522@gmail.com",
+                    Url = new Uri("https://www.linkedin.com/in/moss-ad-ahmed-28aaa6203/")
+                }
+            });
+
+            var xmlFile = $"{typeof(Presentation.AssemblyReference).Assembly.GetName().Name}.xml";
+            var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+            s.IncludeXmlComments(xmlPath);
+
+            s.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+            {
+                In = ParameterLocation.Header,
+                Description = "JWT place holder",
+                Name = "Authorization",
+                Type = SecuritySchemeType.Http,
+                Scheme = "Bearer",
+                BearerFormat = "JWT"
+            });
+
+            s.AddSecurityRequirement(new OpenApiSecurityRequirement()
+            {
+                {
+                    new OpenApiSecurityScheme
+                    {
+                        Reference = new OpenApiReference
+                        {
+                            Type = ReferenceType.SecurityScheme,
+                            Id = "Bearer"
+                        }                    
+                    },
+                    new string[] {}
+                }
+            });
+        });
+    }
 
     // Validators Configuration
     public static void ConfigureValidators(this IServiceCollection services)

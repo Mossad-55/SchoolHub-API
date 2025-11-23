@@ -7,6 +7,7 @@ namespace SchoolHubAPI.Presentation.Controllers;
 
 [Route("api/students")]
 [ApiController]
+[ApiExplorerSettings(GroupName = "v1")]
 public class StudentsController : ControllerBase
 {
     private readonly IServiceManager _service;

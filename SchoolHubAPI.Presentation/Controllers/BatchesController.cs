@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SchoolHubAPI.Presentation.ActionFilters;
 using SchoolHubAPI.Service.Contracts;
 using SchoolHubAPI.Shared.DTOs.Batch;
@@ -10,6 +11,7 @@ namespace SchoolHubAPI.Presentation.Controllers;
 
 [Route("api/courses/{courseId}/batches")]
 [ApiController]
+[ApiExplorerSettings(GroupName = "v1")]
 public class BatchesController : ControllerBase
 {
     private readonly IServiceManager _service;
@@ -36,6 +38,7 @@ public class BatchesController : ControllerBase
 
     [HttpPost]
     [ServiceFilter(typeof(ValidationFilterAttribute))]
+    [Authorize(Roles = "Teacher")]
     public async Task<IActionResult> CreateBatch(Guid courseId, [FromBody] BatchForCreationDto creationDto)
     {
         var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -46,7 +49,7 @@ public class BatchesController : ControllerBase
 
         var batchDto = await _service.BatchService.CreateAsync(courseId, userId, creationDto, courseTrackChanges: false, batchTrackChanges: false);
 
-        return CreatedAtAction("BatchById", new { courseId, id = batchDto!.Id }, batchDto);
+        return CreatedAtRoute("BatchById", new { courseId, batchDto!.Id }, batchDto);
     }
 
     [HttpPut("{id:guid}")]

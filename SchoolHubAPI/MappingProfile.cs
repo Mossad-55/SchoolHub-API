@@ -2,6 +2,7 @@
 using AutoMapper;
 using SchoolHubAPI.Entities.Entities;
 using SchoolHubAPI.Shared.DTOs.Admin;
+using SchoolHubAPI.Shared.DTOs.Batch;
 using SchoolHubAPI.Shared.DTOs.Course;
 using SchoolHubAPI.Shared.DTOs.Department;
 using SchoolHubAPI.Shared.DTOs.Student;
@@ -81,8 +82,25 @@ public class MappingProfile : Profile
                 opts => opts.MapFrom(src => FormatDate(src.UpdatedDate)));
         CreateMap<CourseForCreationDto, Course>();
         CreateMap<CourseForUpdateDto, Course>();
+
+        // Batch Mapping
+        CreateMap<Batch, BatchDto>()
+            .ForMember(b => b.CreatedDate,
+                opts => opts.MapFrom(src => FormatDate(src.CreatedDate)))
+            .ForMember(b => b.UpdatedDate,
+                opts => opts.MapFrom(src => FormatDate(src.UpdatedDate)))
+            .ForMember(b => b.StartDate,
+                opts => opts.MapFrom(src => FormateDateAndTime(src.StartDate)))
+            .ForMember(b => b.EndDate,
+                opts => opts.MapFrom(src => FormateDateAndTime(src.EndDate)));
+        CreateMap<BatchForCreationDto, Batch>();
+        CreateMap<BatchForUpdateDto, Batch>();
+
     }
 
     private static string FormatDate(DateTime? dt) =>
         dt.HasValue ? dt.Value.ToString("MMM dd, yyyy") : string.Empty;
+
+    private static string FormateDateAndTime(DateTime? dt) =>
+        dt.HasValue ? dt.Value.ToString("dd-MM-yyyy hh:mm: tt") : string.Empty;
 }
