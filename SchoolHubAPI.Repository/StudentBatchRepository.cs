@@ -20,16 +20,22 @@ internal sealed class StudentBatchRepository : RepositoryBase<StudentBatch>, ISt
 
     public async Task<StudentBatch?> GetByIdAsync(Guid id, bool trackChanges) =>
         await FindByCondition(sb => sb.Id == id, trackChanges)
+            .Include(sb => sb.Batch)
+            .Include(sb => sb.Student!.User)
             .SingleOrDefaultAsync();
 
     public async Task<StudentBatch?> GetByIdForBatchAsync(Guid batchId, Guid id, bool trackChanges) =>
         await FindByCondition(sb => sb.BatchId == batchId && sb.Id == id, trackChanges)
+            .Include(sb => sb.Batch)
+            .Include(sb => sb.Student!.User)
             .SingleOrDefaultAsync();
 
     public async Task<PagedList<StudentBatch>> GetStudentBatchesAsync(Guid batchId, RequestParameters requestParameters, bool trackChanges)
     {
         var studentBatches = await FindByCondition(sb => sb.BatchId == batchId, trackChanges)
             .Sort(requestParameters.OrderBy!)
+            .Include(sb => sb.Batch)
+            .Include(sb => sb.Student!.User)
             .ToListAsync();
 
         return PagedList<StudentBatch>.ToPagedList(studentBatches, requestParameters.PageNumber, requestParameters.PageSize);

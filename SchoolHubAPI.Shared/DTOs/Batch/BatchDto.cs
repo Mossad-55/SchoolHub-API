@@ -10,6 +10,4 @@ public record BatchDto
     public bool IsActive { get; set; }
     public string? CreatedDate { get; set; }
     public string? UpdatedDate { get; set; }
-    public Guid? CourseId { get; set; }
-    public Guid? TeacherId { get; set; }
 }

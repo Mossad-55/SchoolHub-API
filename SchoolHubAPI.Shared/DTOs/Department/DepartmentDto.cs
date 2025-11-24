@@ -8,5 +8,4 @@ public record DepartmentDto
     public string? CreatedDate { get; set; }
     public string? UpdatedDate { get; set; }
     public string? HeadOfDepartmentName { get; set; }
-    public Guid? HeadOfDepartmentId { get; set; }
 }

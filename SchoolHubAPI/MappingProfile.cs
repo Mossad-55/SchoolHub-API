@@ -6,6 +6,7 @@ using SchoolHubAPI.Shared.DTOs.Batch;
 using SchoolHubAPI.Shared.DTOs.Course;
 using SchoolHubAPI.Shared.DTOs.Department;
 using SchoolHubAPI.Shared.DTOs.Student;
+using SchoolHubAPI.Shared.DTOs.StudentBatch;
 using SchoolHubAPI.Shared.DTOs.Teacher;
 using SchoolHubAPI.Shared.DTOs.User;
 
@@ -90,17 +91,25 @@ public class MappingProfile : Profile
             .ForMember(b => b.UpdatedDate,
                 opts => opts.MapFrom(src => FormatDate(src.UpdatedDate)))
             .ForMember(b => b.StartDate,
-                opts => opts.MapFrom(src => FormateDateAndTime(src.StartDate)))
+                opts => opts.MapFrom(src => FormatDateAndTime(src.StartDate)))
             .ForMember(b => b.EndDate,
-                opts => opts.MapFrom(src => FormateDateAndTime(src.EndDate)));
+                opts => opts.MapFrom(src => FormatDateAndTime(src.EndDate)));
         CreateMap<BatchForCreationDto, Batch>();
         CreateMap<BatchForUpdateDto, Batch>();
 
+        // StudentBatch Mapping
+        CreateMap<StudentBatch, StudentBatchDto>()
+            .ForMember(sb => sb.BatchName,
+                opts => opts.MapFrom(src => src.Batch!.Name))
+            .ForMember(sb => sb.StudentName,
+                opts => opts.MapFrom(src => src.Student!.User!.Name))
+            .ForMember(sb => sb.EnrollmentDate,
+                opts => opts.MapFrom(src => FormatDate(src.EnrollmentDate)));
     }
 
     private static string FormatDate(DateTime? dt) =>
         dt.HasValue ? dt.Value.ToString("MMM dd, yyyy") : string.Empty;
 
-    private static string FormateDateAndTime(DateTime? dt) =>
+    private static string FormatDateAndTime(DateTime? dt) =>
         dt.HasValue ? dt.Value.ToString("dd-MM-yyyy hh:mm: tt") : string.Empty;
 }
