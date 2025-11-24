@@ -100,9 +100,12 @@ public class MappingProfile : Profile
         // StudentBatch Mapping
         CreateMap<StudentBatch, StudentBatchDto>()
             .ForMember(sb => sb.BatchName,
-                opts => opts.MapFrom(src => src.Batch!.Name))
+                opts => opts.MapFrom(src => 
+                    src.Batch != null ? src.Batch.Name : string.Empty))
             .ForMember(sb => sb.StudentName,
-                opts => opts.MapFrom(src => src.Student!.User!.Name))
+                opts => opts.MapFrom(src => 
+                    src.Student != null && src.Student.User != null
+                    ? src.Student.User.Name : string.Empty))
             .ForMember(sb => sb.EnrollmentDate,
                 opts => opts.MapFrom(src => FormatDate(src.EnrollmentDate)));
     }

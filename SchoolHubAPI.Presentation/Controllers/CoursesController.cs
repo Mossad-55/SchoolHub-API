@@ -40,7 +40,7 @@ public class CoursesController : ControllerBase
     {
         var courseDto = await _service.CourseService.CreateAsync(departmentId, creationDto, depTrackChanges: false, courseTrackChanges: false);
 
-        return CreatedAtAction("CourseById", new { departmentId, id = courseDto!.Id }, courseDto);
+        return CreatedAtRoute("CourseById", new { departmentId, id = courseDto!.Id }, courseDto);
     }
 
     [HttpPut("{id:guid}")]

@@ -159,7 +159,7 @@ public static class RepositoryExtensions
         if (string.IsNullOrWhiteSpace(orderByQueryString))
             return studentBatches.OrderBy(b => b.EnrollmentDate);
 
-        var orderQuery = OrderQueryBuilder.CreateOrderQuery<Batch>(orderByQueryString);
+        var orderQuery = OrderQueryBuilder.CreateOrderQuery<StudentBatch>(orderByQueryString);
         if (string.IsNullOrWhiteSpace(orderQuery))
             return studentBatches.OrderBy(b => b.EnrollmentDate);
 
