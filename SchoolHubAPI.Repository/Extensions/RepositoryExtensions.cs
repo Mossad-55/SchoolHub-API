@@ -165,4 +165,28 @@ public static class RepositoryExtensions
 
         return studentBatches.OrderBy(orderQuery);
     }
+
+    // Attendance search & sort
+    public static IQueryable<Attendance> Search(this IQueryable<Attendance> attendances, string searchTerm)
+    {
+        if (string.IsNullOrWhiteSpace(searchTerm))
+            return attendances;
+
+        var lowerCaseTerm = searchTerm.Trim().ToLower();
+
+        return attendances.Where(a =>
+            a.Status != null && a.Status.ToLower().Contains(lowerCaseTerm));
+    }
+
+    public static IQueryable<Attendance> Sort(this IQueryable<Attendance> attendances, string orderByQueryString)
+    {
+        if (string.IsNullOrWhiteSpace(orderByQueryString))
+            return attendances.OrderBy(c => c.Date);
+
+        var orderQuery = OrderQueryBuilder.CreateOrderQuery<Attendance>(orderByQueryString);
+        if (string.IsNullOrWhiteSpace(orderQuery))
+            return attendances.OrderBy(c => c.Date);
+
+        return attendances.OrderBy(orderQuery);
+    }
 }
