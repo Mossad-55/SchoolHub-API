@@ -14,6 +14,6 @@ public class StudentBatch
 
     [ForeignKey("StudentId")]
     public Student? Student { get; set; }
-    [ForeignKey("DepartmentId")]
+    [ForeignKey("BatchId")]
     public Batch? Batch { get; set; }
 }

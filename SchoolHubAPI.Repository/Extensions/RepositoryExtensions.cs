@@ -152,4 +152,17 @@ public static class RepositoryExtensions
 
         return batches.OrderBy(orderQuery);
     }
+
+    // Studnet Batch sort
+    public static IQueryable<StudentBatch> Sort(this IQueryable<StudentBatch> studentBatches, string orderByQueryString)
+    {
+        if (string.IsNullOrWhiteSpace(orderByQueryString))
+            return studentBatches.OrderBy(b => b.EnrollmentDate);
+
+        var orderQuery = OrderQueryBuilder.CreateOrderQuery<Batch>(orderByQueryString);
+        if (string.IsNullOrWhiteSpace(orderQuery))
+            return studentBatches.OrderBy(b => b.EnrollmentDate);
+
+        return studentBatches.OrderBy(orderQuery);
+    }
 }
