@@ -308,9 +308,6 @@ namespace SchoolHubAPI.Migrations
                     b.Property<Guid>("BatchId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("DepartmentId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<DateTime?>("EnrollmentDate")
                         .HasColumnType("datetime2");
 
@@ -319,7 +316,7 @@ namespace SchoolHubAPI.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("DepartmentId");
+                    b.HasIndex("BatchId");
 
                     b.HasIndex("StudentId");
 
@@ -533,7 +530,9 @@ namespace SchoolHubAPI.Migrations
                 {
                     b.HasOne("SchoolHubAPI.Entities.Entities.Batch", "Batch")
                         .WithMany("StudentBatches")
-                        .HasForeignKey("DepartmentId");
+                        .HasForeignKey("BatchId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("SchoolHubAPI.Entities.Entities.Student", "Student")
                         .WithMany()

@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
 namespace SchoolHubAPI.Migrations
 {
     /// <inheritdoc />
@@ -18,29 +20,29 @@ namespace SchoolHubAPI.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     EnrollmentDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     StudentId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    BatchId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    DepartmentId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                    BatchId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_StudentBatches", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_StudentBatches_Batches_DepartmentId",
-                        column: x => x.DepartmentId,
+                        name: "FK_StudentBatches_Batches_BatchId",
+                        column: x => x.BatchId,
                         principalTable: "Batches",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_StudentBatches_Students_StudentId",
                         column: x => x.StudentId,
                         principalTable: "Students",
                         principalColumn: "UserId",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_StudentBatches_DepartmentId",
+                name: "IX_StudentBatches_BatchId",
                 table: "StudentBatches",
-                column: "DepartmentId");
+                column: "BatchId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_StudentBatches_StudentId",
