@@ -8,4 +8,5 @@ public interface IServiceManager
     IDepartmentService DepartmentService { get; }
     ICourseService CourseService { get; }
     IBatchService BatchService { get; }
+    IStudentBatchService StudentBatchService { get; }
 }

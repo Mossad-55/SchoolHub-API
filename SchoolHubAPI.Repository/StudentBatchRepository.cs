@@ -18,12 +18,6 @@ internal sealed class StudentBatchRepository : RepositoryBase<StudentBatch>, ISt
         await FindByCondition(sb => sb.StudentId == studentId && sb.BatchId == batchId, trackChanges)
             .SingleOrDefaultAsync() != null;
 
-    public async Task<StudentBatch?> GetByIdAsync(Guid id, bool trackChanges) =>
-        await FindByCondition(sb => sb.Id == id, trackChanges)
-            .Include(sb => sb.Batch)
-            .Include(sb => sb.Student!.User)
-            .SingleOrDefaultAsync();
-
     public async Task<StudentBatch?> GetByIdForBatchAsync(Guid batchId, Guid id, bool trackChanges) =>
         await FindByCondition(sb => sb.BatchId == batchId && sb.Id == id, trackChanges)
             .Include(sb => sb.Batch)
