@@ -63,6 +63,17 @@ internal sealed class StudentBatchService : IStudentBatchService
         return (studentBatchDtos, studentBatchesWithMetaData.MetaData);
     }
 
+    public async Task<(IEnumerable<BatchForStudentDto> StudentBatchDtos, MetaData MetaData)> GetAllForStudentAsync(Guid studentId, RequestParameters requestParameters, bool sbTrackChanges)
+    {
+        _logger.LogInfo($"Retrieving batches for student with id: {studentId}.");
+
+        var studentBatchesWithMetaData = await _repository.StudentBatch.GetBatchesForStudentAsync(studentId, requestParameters, sbTrackChanges);
+
+        var batchesForStudentDto = _mapper.Map<IEnumerable<BatchForStudentDto>>(studentBatchesWithMetaData);
+
+        return (batchesForStudentDto, studentBatchesWithMetaData.MetaData);
+    }
+
     public async Task<StudentBatchDto?> GetByIdForBatchAsync(Guid batchId, Guid id, bool batchTrackChanges, bool sbTrackChanges)
     {
         _logger.LogInfo($"Retrieving enrollment {id} for batch {batchId}.");

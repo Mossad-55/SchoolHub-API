@@ -31,4 +31,14 @@ public class StudentsController : ControllerBase
 
         return Ok(studentDto);
     }
+
+    [HttpGet("{id:guid}/batches")]
+    public async Task<IActionResult> GetBachtesForStudent(Guid id, [FromQuery] RequestParameters requestParameters)
+    {
+        var result = await _service.StudentBatchService.GetAllForStudentAsync(id, requestParameters, sbTrackChanges: false);
+
+        Response.Headers.TryAdd("X-Pagination", JsonSerializer.Serialize(result.MetaData));
+
+        return Ok(result.StudentBatchDtos);
+    }
 }

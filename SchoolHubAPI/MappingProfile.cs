@@ -108,11 +108,32 @@ public class MappingProfile : Profile
                     ? src.Student.User.Name : string.Empty))
             .ForMember(sb => sb.EnrollmentDate,
                 opts => opts.MapFrom(src => FormatDate(src.EnrollmentDate)));
+
+        CreateMap<StudentBatch, BatchForStudentDto>()
+            .ForMember(sb => sb.BatchName,
+                opts => opts.MapFrom(src =>
+                    src.Batch != null ? src.Batch.Name : string.Empty))
+            .ForMember(sb => sb.CourseName,
+                opts => opts.MapFrom(src =>
+                    src.Batch != null && src.Batch.Course != null ?
+                    src.Batch.Course.Name : string.Empty))
+            .ForMember(sb => sb.Semester,
+                opts => opts.MapFrom(src =>
+                    src.Batch != null ? src.Batch.Semester : string.Empty))
+            .ForMember(sb => sb.EndDate,
+                opts => opts.MapFrom(src =>
+                    src.Batch != null ? FormatDateAndTime(src.Batch.EndDate) : string.Empty))
+            .ForMember(sb => sb.StartDate,
+                opts => opts.MapFrom(src =>
+                    src.Batch != null ? FormatDateAndTime(src.Batch.StartDate) : string.Empty))
+            .ForMember(sb => sb.IsActive,
+                opts => opts.MapFrom(src =>
+                    src.Batch != null ? src.Batch.IsActive : false));
     }
 
     private static string FormatDate(DateTime? dt) =>
         dt.HasValue ? dt.Value.ToString("MMM dd, yyyy") : string.Empty;
 
     private static string FormatDateAndTime(DateTime? dt) =>
-        dt.HasValue ? dt.Value.ToString("dd-MM-yyyy hh:mm: tt") : string.Empty;
+        dt.HasValue ? dt.Value.ToString("dd-MM-yyyy hh:mm tt") : string.Empty;
 }
