@@ -23,6 +23,9 @@ internal sealed class AttendanceRepostiroy : RepositoryBase<Attendance>, IAttend
         var attendaceEntities = await FindByCondition(a => a.BatchId == batchId, trackChanges)
             .Search(requestParameters.SearchTerm!)
             .Sort(requestParameters.OrderBy!)
+            .Include(a => a.Batch)
+            .Include(a => a.Teacher).ThenInclude(t => t!.User)
+            .Include(a => a.Student).ThenInclude(s => s!.User)
             .ToListAsync();
 
         return PagedList<Attendance>.ToPagedList(attendaceEntities, requestParameters.PageNumber, requestParameters.PageSize);
@@ -33,6 +36,9 @@ internal sealed class AttendanceRepostiroy : RepositoryBase<Attendance>, IAttend
         var attendaceEntities = await FindByCondition(a => a.BatchId == batchId && a.StudentId == studentId, trackChanges)
              .Search(requestParameters.SearchTerm!)
              .Sort(requestParameters.OrderBy!)
+             .Include(a => a.Batch)
+             .Include(a => a.Teacher).ThenInclude(t => t!.User)
+             .Include(a => a.Student).ThenInclude(s => s!.User)
              .ToListAsync();
 
         return PagedList<Attendance>.ToPagedList(attendaceEntities, requestParameters.PageNumber, requestParameters.PageSize);

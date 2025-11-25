@@ -2,6 +2,7 @@
 using AutoMapper;
 using SchoolHubAPI.Entities.Entities;
 using SchoolHubAPI.Shared.DTOs.Admin;
+using SchoolHubAPI.Shared.DTOs.Attendance;
 using SchoolHubAPI.Shared.DTOs.Batch;
 using SchoolHubAPI.Shared.DTOs.Course;
 using SchoolHubAPI.Shared.DTOs.Department;
@@ -129,6 +130,23 @@ public class MappingProfile : Profile
             .ForMember(sb => sb.IsActive,
                 opts => opts.MapFrom(src =>
                     src.Batch != null ? src.Batch.IsActive : false));
+
+        CreateMap<Attendance, AttendanceDto>()
+            .ForMember(a => a.BatchName,
+                opts => opts.MapFrom(src =>
+                    src.Batch != null ? src.Batch.Name : string.Empty))
+            .ForMember(a => a.StudentName,
+                opts => opts.MapFrom(src =>
+                    src.Student!.User != null ? src.Student.User.Name : string.Empty))
+            .ForMember(a => a.MarkeyByTeacherName,
+                opts => opts.MapFrom(src =>
+                    src.Teacher!.User != null ? src.Teacher.User.Name : string.Empty))
+            .ForMember(a => a.Date,
+                opts => opts.MapFrom(src => FormatDateAndTime(src.Date)))
+            .ForMember(a => a.BatchName,
+                opts => opts.MapFrom(src => FormatDate(src.CreatedDate)));
+        CreateMap<AttendanceForCreationDto, Attendance>();
+        CreateMap<AttendanceForUpdateDto, Attendance>();
     }
 
     private static string FormatDate(DateTime? dt) =>

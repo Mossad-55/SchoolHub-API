@@ -19,4 +19,6 @@ public class Attendance
     public Batch? Batch { get; set; }
     [ForeignKey("StudentId")]
     public Student? Student { get; set; }
+    [ForeignKey("MarkedByTeacherId")]
+    public Teacher? Teacher { get; set; }
 }
