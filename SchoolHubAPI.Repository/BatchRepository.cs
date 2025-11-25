@@ -21,12 +21,22 @@ internal sealed class BatchRepository : RepositoryBase<Batch>, IBatchRepsitory
 
     public void DeleteBatch(Batch batch) => Delete(batch);
 
-    public async Task<PagedList<Batch>> GetAllBatches(Guid courseId, RequestParameters requestParameters, bool trackChanges)
+    public async Task<PagedList<Batch>> GetAllBatchesForCourse(Guid courseId, RequestParameters requestParameters, bool trackChanges)
     {
         var batches = await FindByCondition(b => b.CourseId == courseId, trackChanges)
             .Search(requestParameters.SearchTerm!)
             .Sort(requestParameters.OrderBy!)
             .ToListAsync();
+
+        return PagedList<Batch>.ToPagedList(batches, requestParameters.PageNumber, requestParameters.PageSize);
+    }
+
+    public async Task<PagedList<Batch>> GetAllBatchesForTeacher(Guid teacherId, RequestParameters requestParameters, bool trackChanges)
+    {
+        var batches = await FindByCondition(b => b.TeacherId == teacherId, trackChanges)
+           .Search(requestParameters.SearchTerm!)
+           .Sort(requestParameters.OrderBy!)
+           .ToListAsync();
 
         return PagedList<Batch>.ToPagedList(batches, requestParameters.PageNumber, requestParameters.PageSize);
     }

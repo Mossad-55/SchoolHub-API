@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SchoolHubAPI.Service.Contracts;
 using SchoolHubAPI.Shared.RequestFeatures;
+using System.Security.Claims;
 using System.Text.Json;
 
 namespace SchoolHubAPI.Presentation.Controllers;
@@ -32,10 +34,17 @@ public class StudentsController : ControllerBase
         return Ok(studentDto);
     }
 
-    [HttpGet("{id:guid}/batches")]
-    public async Task<IActionResult> GetBachtesForStudent(Guid id, [FromQuery] RequestParameters requestParameters)
+    [HttpGet("batches")]
+    [Authorize(Roles = "Student")]
+    public async Task<IActionResult> GetBachtesForStudent([FromQuery] RequestParameters requestParameters)
     {
-        var result = await _service.StudentBatchService.GetAllForStudentAsync(id, requestParameters, sbTrackChanges: false);
+        var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (!Guid.TryParse(userIdString, out Guid userId))
+        {
+            return BadRequest(new { message = "Invalid user identifier." });
+        }
+
+        var result = await _service.StudentBatchService.GetAllForStudentAsync(userId, requestParameters, sbTrackChanges: false);
 
         Response.Headers.TryAdd("X-Pagination", JsonSerializer.Serialize(result.MetaData));
 

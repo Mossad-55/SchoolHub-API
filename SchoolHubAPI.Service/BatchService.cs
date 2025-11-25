@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Identity;
 using SchoolHubAPI.Contracts;
 using SchoolHubAPI.Entities.Entities;
 using SchoolHubAPI.Entities.Exceptions;
@@ -64,7 +65,7 @@ internal sealed class BatchService : IBatchService
 
         await EnsureCourseExistsAsync(courseId, courseTrackChanges);
 
-        var batchEntitiesWithMetaData = await _repository.Batch.GetAllBatches(courseId, requestParameters, batchTrackChanges);
+        var batchEntitiesWithMetaData = await _repository.Batch.GetAllBatchesForCourse(courseId, requestParameters, batchTrackChanges);
 
         var batchDtos = _mapper.Map<IEnumerable<BatchDto>>(batchEntitiesWithMetaData);
 
@@ -144,6 +145,17 @@ internal sealed class BatchService : IBatchService
         _logger.LogInfo($"Batch {id} has been deactivated for course {courseId}.");
 
         await _repository.SaveChangesAsync();
+    }
+
+    public async Task<(IEnumerable<BatchDto> BatchDtos, MetaData MetaData)> GetAllAsyncForTeacher(Guid teacherId, RequestParameters requestParameters, bool batchTrackChanges)
+    {
+        _logger.LogInfo($"Retrieving batches for teacher {teacherId} - page {requestParameters.PageNumber}, size {requestParameters.PageSize}.");
+
+        var batchEntitiesWithMetaData = await _repository.Batch.GetAllBatchesForTeacher(teacherId, requestParameters, batchTrackChanges);
+
+        var batchDtos = _mapper.Map<IEnumerable<BatchDto>>(batchEntitiesWithMetaData);
+
+        return (batchDtos, batchEntitiesWithMetaData.MetaData);
     }
 
     // Private Functions
