@@ -7,7 +7,8 @@ public interface IAttendanceService
 {
     Task<(IEnumerable<AttendanceDto> AttendanceDtos, MetaData MetaData)> GetAttendanceForBatchAsync(Guid batchId, RequestParameters requestParameters, bool batchTrackChanges, bool attTrackChanges);
     Task<(IEnumerable<AttendanceDto> AttendanceDtos, MetaData MetaData)> GetAttendanceForStudentAsync(Guid batchId, Guid studentId, RequestParameters requestParameters, bool batchTrackChanges, bool attTrackChanges);
-    Task CreateAttendanceAsync(Guid batchId, Guid teacherId, AttendanceForCreationDto creationDto, bool batchTrackChanges, bool attTrackChanges);
-    Task UpdateAttendanceAsync(Guid batchId, Guid attendanceId, AttendanceForUpdateDto updateDto, bool batchTrackChanges, bool attTrackChanges);
-    Task DeleteAttendanceAsync(Guid batchId, Guid attendanceId, bool batchTrackChanges, bool attTrackChanges);
+    Task<AttendanceDto> GetAttendanceForBatchAsync(Guid batchId, Guid id, bool batchTrackChanges, bool attTrackChanges);
+    Task<AttendanceDto?> CreateAttendanceAsync(Guid batchId, Guid teacherId, AttendanceForCreationDto creationDto, bool batchTrackChanges, bool attTrackChanges);
+    Task UpdateAttendanceAsync(Guid batchId, Guid teacherId, Guid id, AttendanceForUpdateDto updateDto, bool batchTrackChanges, bool attTrackChanges);
+    Task DeleteAttendanceAsync(Guid batchId, Guid teacherId, Guid id, bool batchTrackChanges, bool attTrackChanges);
 }
