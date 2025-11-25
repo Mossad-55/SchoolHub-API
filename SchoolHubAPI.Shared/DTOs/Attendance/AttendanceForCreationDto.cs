@@ -2,8 +2,8 @@
 
 public record AttendanceForCreationDto
 {
-    public DateTime? Date { get; set; }
-    public DateTime? CreatedDate { get; set; }
+    public DateTime? Date { get; set; } = DateTime.UtcNow;
+    public DateTime? CreatedDate { get; set; } = DateTime.UtcNow;
     public string? Status { get; set; }
     public Guid StudentId { get; set; }
 }

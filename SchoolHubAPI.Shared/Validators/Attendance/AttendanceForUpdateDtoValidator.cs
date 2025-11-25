@@ -22,8 +22,5 @@ public class AttendanceForUpdateDtoValidator : AbstractValidator<AttendanceForUp
                 var allowed = new[] { "Present", "Absent", "Late" };
                 return s == null || allowed.Contains(s.Trim(), StringComparer.OrdinalIgnoreCase);
             }).WithMessage("Status must be one of: Present, Absent, Late.");
-
-        RuleFor(x => x.StudentId)
-            .NotEmpty().WithMessage("StudentId is required.");
     }
 }

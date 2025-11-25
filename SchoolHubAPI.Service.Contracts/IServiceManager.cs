@@ -9,4 +9,5 @@ public interface IServiceManager
     ICourseService CourseService { get; }
     IBatchService BatchService { get; }
     IStudentBatchService StudentBatchService { get; }
+    IAttendanceService AttendanceService { get; }
 }

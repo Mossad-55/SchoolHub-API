@@ -44,5 +44,9 @@ internal sealed class AttendanceRepostiroy : RepositoryBase<Attendance>, IAttend
         return PagedList<Attendance>.ToPagedList(attendaceEntities, requestParameters.PageNumber, requestParameters.PageSize);
     }
 
+    public async Task<Attendance?> GetAttendanceForBatch(Guid batchId, Guid attendanceId, bool trackChanges) =>
+        await FindByCondition(a => a.Id == attendanceId && a.BatchId == batchId, trackChanges)
+            .SingleOrDefaultAsync();
+
     public void RemoveAttendanceAsync(Attendance attendance) => Delete(attendance);
 }

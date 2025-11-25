@@ -32,7 +32,7 @@ internal sealed class StudentBatchService : IStudentBatchService
 
         await EnsureBatchExists(batchId, batchTrackChanges);
 
-        await EnsureStudentExistsWithRole(studentId, sbTrackChanges);
+        await EnsureStudentExistsWithRole(studentId);
 
         await EnsureStudentNotEnrolledInBatch(studentId, batchId, sbTrackChanges);
 
@@ -115,7 +115,7 @@ internal sealed class StudentBatchService : IStudentBatchService
         _logger.LogDebug($"Batch with id: {batchId} exists.");
     }
 
-    private async Task EnsureStudentExistsWithRole(Guid studentId, bool trackChanges)
+    private async Task EnsureStudentExistsWithRole(Guid studentId)
     {
         var user = await _userManager.FindByIdAsync(studentId.ToString());
         if(user is null)
