@@ -13,7 +13,7 @@ namespace SchoolHubAPI.Presentation.Controllers;
 public class StudentsController : ControllerBase
 {
     private readonly IServiceManager _service;
-
+    
     public StudentsController(IServiceManager service) => _service = service;
 
     [HttpGet]
@@ -49,5 +49,20 @@ public class StudentsController : ControllerBase
         Response.Headers.TryAdd("X-Pagination", JsonSerializer.Serialize(result.MetaData));
 
         return Ok(result.StudentBatchDtos);
+    }
+
+    [HttpGet("batches/{batchId}/attendances")]
+    [Authorize(Roles = "Student")]
+    public async Task<IActionResult> GetAttendanceForStudent(Guid batchId, [FromQuery] RequestParameters requestParameters)
+    {
+        var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (!Guid.TryParse(userIdString, out Guid userId))
+        {
+            return BadRequest(new { message = "Invalid user identifier." });
+        }
+
+        var result = await _service.AttendanceService.GetAttendanceForStudentAsync(batchId, userId, batchTrackChanges: false, attTrackChanges: false);
+
+        return Ok(result);
     }
 }

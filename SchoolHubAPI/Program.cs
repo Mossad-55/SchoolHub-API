@@ -45,11 +45,13 @@ app.ConfigureExceptionHandler(logger);
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI(s =>
+    app.UseSwaggerUI(c =>
     {
-        s.SwaggerEndpoint("swagger/v1/swagger.json", "School Hub API v1");
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "School Hub API v1");
+        c.RoutePrefix = "swagger";
     });
 }
+
 
 if (app.Environment.IsProduction())
     app.UseHsts();

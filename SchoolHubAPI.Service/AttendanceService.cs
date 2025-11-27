@@ -46,7 +46,9 @@ internal sealed class AttendanceService : IAttendanceService
 
         _logger.LogInfo($"Attendance for student with id: {creationDto.StudentId} was created for batch {batchId}.");
 
-        return _mapper.Map<AttendanceDto>(attendanceEntity);
+        var attendanceDto = _mapper.Map<AttendanceDto>(attendanceEntity);
+
+        return attendanceDto;
     }
 
     public async Task DeleteAttendanceAsync(Guid batchId, Guid teacherId, Guid id, bool batchTrackChanges, bool attTrackChanges)
@@ -99,17 +101,19 @@ internal sealed class AttendanceService : IAttendanceService
         return attendanceDto;
     }
 
-    public async Task<(IEnumerable<AttendanceDto> AttendanceDtos, MetaData MetaData)> GetAttendanceForStudentAsync(Guid batchId, Guid studentId, RequestParameters requestParameters, bool batchTrackChanges, bool attTrackChanges)
+    public async Task<AttendanceDto> GetAttendanceForStudentAsync(Guid batchId, Guid studentId, bool batchTrackChanges, bool attTrackChanges)
     {
         _logger.LogInfo($"Retrieving attendance for student with id: {studentId} for batch {batchId}.");
 
         await EnsureBatchExists(batchId, batchTrackChanges);
 
-        var attendancesWithMetaData = await _repository.Attendance.GetAllForStudenthAsync(batchId, studentId, requestParameters, attTrackChanges);
+        var attendanceEntity = await _repository.Attendance.GetAttendanceForStudenthAsync(batchId, studentId, attTrackChanges);
+        if(attendanceEntity is null)
+            throw new AttendanceNotFoundException(studentId);
 
-        var attendanedDtos = _mapper.Map<IEnumerable<AttendanceDto>>(attendancesWithMetaData);
+        var attendanedDto = _mapper.Map<AttendanceDto>(attendanceEntity);
 
-        return (attendanedDtos, attendancesWithMetaData.MetaData);
+        return attendanedDto;
     }
 
     public async Task UpdateAttendanceAsync(Guid batchId, Guid teacherId, Guid id, AttendanceForUpdateDto updateDto, bool batchTrackChanges, bool attTrackChanges)
@@ -166,7 +170,7 @@ internal sealed class AttendanceService : IAttendanceService
 
     private async Task EnsureStudentNotAttendedInBatch(Guid studentId, Guid batchId, bool trackChanges)
     {
-        if (await _repository.Attendance.ExistsAsync(studentId, batchId, trackChanges))
+        if (await _repository.Attendance.ExistsAsync(batchId, studentId, trackChanges))
         {
             _logger.LogWarn($"Student with id: {studentId} attended in batch {batchId}.");
             throw new StudentIsEnrolledException(studentId);

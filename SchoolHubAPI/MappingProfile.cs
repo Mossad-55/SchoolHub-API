@@ -137,10 +137,10 @@ public class MappingProfile : Profile
                     src.Batch != null ? src.Batch.Name : string.Empty))
             .ForMember(a => a.StudentName,
                 opts => opts.MapFrom(src =>
-                    src.Student!.User != null ? src.Student.User.Name : string.Empty))
+                    src.Student != null && src.Student.User != null ? src.Student.User.Name : string.Empty))
             .ForMember(a => a.MarkeyByTeacherName,
                 opts => opts.MapFrom(src =>
-                    src.Teacher!.User != null ? src.Teacher.User.Name : string.Empty))
+                    src.Teacher != null && src.Teacher.User != null ? src.Teacher.User.Name : string.Empty))
             .ForMember(a => a.Date,
                 opts => opts.MapFrom(src => FormatDateAndTime(src.Date)))
             .ForMember(a => a.BatchName,

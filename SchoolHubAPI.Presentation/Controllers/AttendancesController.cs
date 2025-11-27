@@ -19,7 +19,7 @@ public class AttendancesController : ControllerBase
     public AttendancesController(IServiceManager service) => _service = service;
 
     [HttpGet]
-    public async Task<IActionResult> GetAttendanceForBatch(Guid batchId, [FromQuery] RequestParameters requestParameters)
+    public async Task<IActionResult> GetAllAttendancesForBatch(Guid batchId, [FromQuery] RequestParameters requestParameters)
     {
         var result = await _service.AttendanceService.GetAttendanceForBatchAsync(batchId, requestParameters, batchTrackChanges: false, attTrackChanges: false);
 
@@ -29,7 +29,7 @@ public class AttendancesController : ControllerBase
     }
 
     [HttpGet("{id:guid}", Name = "GetAttendanceById")]
-    public async Task<IActionResult> GetAttendanceForBatch(Guid batchId, Guid id)
+    public async Task<IActionResult> GetAttendanceById(Guid batchId, Guid id)
     {
         var attendanceDto = await _service.AttendanceService.GetAttendanceForBatchAsync(batchId, id, batchTrackChanges: false, attTrackChanges: false);
 

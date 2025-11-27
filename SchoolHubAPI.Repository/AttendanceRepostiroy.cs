@@ -31,18 +31,13 @@ internal sealed class AttendanceRepostiroy : RepositoryBase<Attendance>, IAttend
         return PagedList<Attendance>.ToPagedList(attendaceEntities, requestParameters.PageNumber, requestParameters.PageSize);
     }
 
-    public async Task<PagedList<Attendance>> GetAllForStudenthAsync(Guid batchId, Guid studentId, RequestParameters requestParameters, bool trackChanges)
-    {
-        var attendaceEntities = await FindByCondition(a => a.BatchId == batchId && a.StudentId == studentId, trackChanges)
-             .Search(requestParameters.SearchTerm!)
-             .Sort(requestParameters.OrderBy!)
+    public async Task<Attendance?> GetAttendanceForStudenthAsync(Guid batchId, Guid studentId, bool trackChanges) =>
+        await FindByCondition(a => a.BatchId == batchId && a.StudentId == studentId, trackChanges)
              .Include(a => a.Batch)
              .Include(a => a.Teacher).ThenInclude(t => t!.User)
              .Include(a => a.Student).ThenInclude(s => s!.User)
-             .ToListAsync();
-
-        return PagedList<Attendance>.ToPagedList(attendaceEntities, requestParameters.PageNumber, requestParameters.PageSize);
-    }
+             .SingleOrDefaultAsync();
+        
 
     public async Task<Attendance?> GetAttendanceForBatch(Guid batchId, Guid attendanceId, bool trackChanges) =>
         await FindByCondition(a => a.Id == attendanceId && a.BatchId == batchId, trackChanges)
