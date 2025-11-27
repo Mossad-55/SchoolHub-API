@@ -2,6 +2,7 @@
 using SchoolHubAPI.Presentation.ActionFilters;
 using SchoolHubAPI.Service.Contracts;
 using SchoolHubAPI.Shared.DTOs.User;
+using System.Collections.Immutable;
 using System.Security.Claims;
 
 namespace SchoolHubAPI.Presentation.Controllers;
@@ -67,8 +68,16 @@ public class AuthenticationController : ControllerBase
     [ServiceFilter(typeof(ValidationFilterAttribute))]
     public async Task<IActionResult> RefreshToken([FromBody] TokenDto tokenDto)
     {
-        var tokenToReturn = await _authService.AuthenticationService.GenerateRefreshTokenAsync(tokenDto);
+        var authHeader = Request.Headers["Authorization"].ToString();
+        if(!string.IsNullOrWhiteSpace(authHeader) && authHeader.StartsWith("Bearer "))
+        {
+            tokenDto.AccessToken = authHeader["Bearer ".Length..].Trim();
 
-        return Ok(tokenToReturn);
+            var tokenToReturn = await _authService.AuthenticationService.GenerateRefreshTokenAsync(tokenDto);
+
+            return Ok(tokenToReturn);
+        }
+
+        return BadRequest(new { StatusCode = 400, Message = "No token found in Authorization header" });
     }
 }
