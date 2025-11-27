@@ -21,5 +21,5 @@ public class Assignment
     public Batch? Batch { get; set; }
 
     // Navigation
-    // public virtual ICollection<Submission>? Submissions { get; set; }
+    public virtual ICollection<Submission>? Submissions { get; set; }
 }
