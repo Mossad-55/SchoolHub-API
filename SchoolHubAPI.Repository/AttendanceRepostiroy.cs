@@ -41,6 +41,9 @@ internal sealed class AttendanceRepostiroy : RepositoryBase<Attendance>, IAttend
 
     public async Task<Attendance?> GetAttendanceForBatch(Guid batchId, Guid attendanceId, bool trackChanges) =>
         await FindByCondition(a => a.Id == attendanceId && a.BatchId == batchId, trackChanges)
+            .Include(a => a.Batch)
+            .Include(a => a.Teacher).ThenInclude(t => t!.User)
+            .Include(a => a.Student).ThenInclude(s => s!.User)
             .SingleOrDefaultAsync();
 
     public void RemoveAttendanceAsync(Attendance attendance) => Delete(attendance);

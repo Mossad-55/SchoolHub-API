@@ -7,10 +7,10 @@ public class Assignment
 {
     [Key]
     public Guid Id { get; set; }
-    public string Title { get; set; } = string.Empty;
+    public string? Title { get; set; }
     public string? Description { get; set; }
     public DateTime? DueDate { get; set; }
-    public DateTime CreatedDate { get; set; }
+    public DateTime? CreatedDate { get; set; }
     
     public Guid CreatedByTeacherId { get; set; }
     public Guid BatchId { get; set; }

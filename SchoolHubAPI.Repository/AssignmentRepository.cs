@@ -25,6 +25,8 @@ internal sealed class AssignmentRepository : RepositoryBase<Assignment>, IAssign
         var assignmentEntities = await FindByCondition(a => a.BatchId == batchId, trackChanges)
             .Search(requestParameters.SearchTerm!)
             .Sort(requestParameters.OrderBy!)
+            .Include(a => a.Batch)
+            .Include(a => a.Teacher).ThenInclude(t => t!.User)
             .ToListAsync();
 
         return PagedList<Assignment>.ToPagedList(assignmentEntities, requestParameters.PageNumber, requestParameters.PageSize);
@@ -32,10 +34,14 @@ internal sealed class AssignmentRepository : RepositoryBase<Assignment>, IAssign
 
     public async Task<Assignment?> GetByIdAsync(Guid id, bool trackChanges) =>
         await FindByCondition(a => a.Id == id, trackChanges)
+            .Include(a => a.Batch)
+            .Include(a => a.Teacher).ThenInclude(t => t!.User)
             .SingleOrDefaultAsync();
 
     public async Task<Assignment?> GetForBatchByIdAsync(Guid batchId, Guid id, bool trackChanges) =>
         await FindByCondition(a => a.Id == id && a.BatchId == batchId, trackChanges)
+            .Include(a => a.Batch)
+            .Include(a => a.Teacher).ThenInclude(t => t!.User)
             .SingleOrDefaultAsync();
 
     public void UpdateAssignment(Assignment assignment) => Update(assignment);

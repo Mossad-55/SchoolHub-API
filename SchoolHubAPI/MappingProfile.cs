@@ -2,6 +2,7 @@
 using AutoMapper;
 using SchoolHubAPI.Entities.Entities;
 using SchoolHubAPI.Shared.DTOs.Admin;
+using SchoolHubAPI.Shared.DTOs.Assignment;
 using SchoolHubAPI.Shared.DTOs.Attendance;
 using SchoolHubAPI.Shared.DTOs.Batch;
 using SchoolHubAPI.Shared.DTOs.Course;
@@ -131,6 +132,7 @@ public class MappingProfile : Profile
                 opts => opts.MapFrom(src =>
                     src.Batch != null ? src.Batch.IsActive : false));
 
+        // Attendance Mapping
         CreateMap<Attendance, AttendanceDto>()
             .ForMember(a => a.BatchName,
                 opts => opts.MapFrom(src =>
@@ -147,6 +149,21 @@ public class MappingProfile : Profile
                 opts => opts.MapFrom(src => FormatDate(src.CreatedDate)));
         CreateMap<AttendanceForCreationDto, Attendance>();
         CreateMap<AttendanceForUpdateDto, Attendance>();
+
+        // Assignment Mapping
+        CreateMap<Assignment, AssignmentDto>()
+            .ForMember(a => a.CreatedDate,
+                opts => opts.MapFrom(src => FormatDateAndTime(src.CreatedDate)))
+            .ForMember(a => a.DueDate,
+                opts => opts.MapFrom(src => FormatDateAndTime(src.DueDate)))
+            .ForMember(a => a.CreatedByTeacherName,
+                opts => opts.MapFrom(src =>
+                    src.Teacher != null && src.Teacher.User != null ? src.Teacher.User.Name : string.Empty))
+            .ForMember(a => a.BatchName,
+                opts => opts.MapFrom(src =>
+                    src.Batch != null ? src.Batch.Name : string.Empty));
+        CreateMap<AssignmentForCreationDto, Assignment>();
+        CreateMap<AssignmentForUpdateDto, Assignment>();
     }
 
     private static string FormatDate(DateTime? dt) =>
