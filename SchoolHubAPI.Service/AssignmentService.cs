@@ -107,7 +107,7 @@ internal sealed class AssignmentService : IAssignmentService
             throw new BatchNotFoundException(batchId);
         }
 
-        _logger.LogDebug($"Course with id: {batchId} exists.");
+        _logger.LogDebug($"Batch with id: {batchId} exists.");
     }
 
     private async Task<Assignment> GetAssignmentForBatch(Guid batchId, Guid id, bool trackChanges)

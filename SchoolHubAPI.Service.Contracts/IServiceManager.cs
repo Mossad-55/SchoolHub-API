@@ -11,4 +11,5 @@ public interface IServiceManager
     IStudentBatchService StudentBatchService { get; }
     IAttendanceService AttendanceService { get; }
     IAssignmentService AssignmentService { get; }
+    ISubmissionService SubmissionService { get; }
 }

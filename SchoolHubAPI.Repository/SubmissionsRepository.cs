@@ -12,9 +12,13 @@ internal sealed class SubmissionsRepository : RepositoryBase<Submission>, ISubmi
     {
     }
 
-    public void CreateAssignment(Submission assignment) => Create(assignment);
+    public async Task<bool> CheckForSubmissionAsync(Guid assignmentId, Guid studentId, bool trackChanges) =>
+        await FindByCondition(s => s.AssignmentId == assignmentId && s.StudentId == studentId, trackChanges)
+            .SingleOrDefaultAsync() != null;
 
-    public void DeleteAssignment(Submission assignment) => Delete(assignment);
+    public void CreateSubmission(Submission assignment) => Create(assignment);
+
+    public void DeleteSubmission(Submission assignment) => Delete(assignment);
 
     public async Task<PagedList<Submission>> GetAllForAssignmentAsync(Guid assignmentId, RequestParameters requestParameters, bool trackChanges)
     {
@@ -35,5 +39,5 @@ internal sealed class SubmissionsRepository : RepositoryBase<Submission>, ISubmi
             .Include(s => s.Teacher).ThenInclude(s => s!.User)
             .SingleOrDefaultAsync();
 
-    public void UpdateAssignment(Submission assignment) => Update(assignment);
+    public void UpdateSubmission(Submission assignment) => Update(assignment);
 }

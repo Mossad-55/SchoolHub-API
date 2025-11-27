@@ -9,6 +9,7 @@ using SchoolHubAPI.Shared.DTOs.Course;
 using SchoolHubAPI.Shared.DTOs.Department;
 using SchoolHubAPI.Shared.DTOs.Student;
 using SchoolHubAPI.Shared.DTOs.StudentBatch;
+using SchoolHubAPI.Shared.DTOs.Submission;
 using SchoolHubAPI.Shared.DTOs.Teacher;
 using SchoolHubAPI.Shared.DTOs.User;
 
@@ -164,6 +165,23 @@ public class MappingProfile : Profile
                     src.Batch != null ? src.Batch.Name : string.Empty));
         CreateMap<AssignmentForCreationDto, Assignment>();
         CreateMap<AssignmentForUpdateDto, Assignment>();
+
+        // Submission Mapping
+        CreateMap<Submission, SubmissionDto>()
+            .ForMember(s => s.SubmittedDate,
+                opts => opts.MapFrom(src => FormatDateAndTime(src.SubmittedDate)))
+            .ForMember(s => s.TeacherName,
+                opts => opts.MapFrom(src =>
+                    src.Teacher != null && src.Teacher.User != null ? src.Teacher.User.Name : string.Empty))
+            .ForMember(s => s.StudentName,
+                opts => opts.MapFrom(src =>
+                    src.Student != null && src.Student.User != null ? src.Student.User.Name : string.Empty))
+            .ForMember(s => s.AssignmentTitle,
+                opts => opts.MapFrom(src =>
+                    src.Assignment != null ? src.Assignment.Title : string.Empty));
+        CreateMap<SubmissionForCreationDto, Submission>();
+        CreateMap<SubmissionForUpdateDto, Submission>();
+        CreateMap<GradeSubmissionForUpdateDto, Submission>();
     }
 
     private static string FormatDate(DateTime? dt) =>

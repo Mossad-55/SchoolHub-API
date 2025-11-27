@@ -14,6 +14,7 @@ public sealed class RepositoryManager : IRepositoryManager
     private readonly Lazy<IStudentBatchRepository> _studentBatchRepository;
     private readonly Lazy<IAttendanceRepository> _attendanceRepository;
     private readonly Lazy<IAssignmentRepostiory> _assignmentRepostiory;
+    private readonly Lazy<ISubmissionRepository> _submissionRepository;
     
     public RepositoryManager(RepositoryContext repositoryContext)
     {
@@ -27,6 +28,7 @@ public sealed class RepositoryManager : IRepositoryManager
         _studentBatchRepository = new Lazy<IStudentBatchRepository>(() => new StudentBatchRepository(_repositoryContext));
         _attendanceRepository = new Lazy<IAttendanceRepository>(() => new AttendanceRepostiroy(_repositoryContext));
         _assignmentRepostiory = new Lazy<IAssignmentRepostiory>(() => new AssignmentRepository(_repositoryContext));
+        _submissionRepository = new Lazy<ISubmissionRepository>(() => new SubmissionsRepository(_repositoryContext));
     }
 
     // Repositories 
@@ -39,6 +41,7 @@ public sealed class RepositoryManager : IRepositoryManager
     public IStudentBatchRepository StudentBatch => _studentBatchRepository.Value;
     public IAttendanceRepository Attendance => _attendanceRepository.Value;
     public IAssignmentRepostiory Assignment => _assignmentRepostiory.Value;
+    public ISubmissionRepository Submission => _submissionRepository.Value;
     
     // Common Methods
     public async Task SaveChangesAsync() => await _repositoryContext.SaveChangesAsync();
