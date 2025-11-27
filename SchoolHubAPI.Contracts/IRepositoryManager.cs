@@ -11,6 +11,7 @@ public interface IRepositoryManager
     IBatchRepsitory Batch { get; }
     IStudentBatchRepository StudentBatch { get; }
     IAttendanceRepository Attendance { get; }
+    IAssignmentRepostiory Assignment { get; }
 
     // Shared Methods.
     Task SaveChangesAsync();

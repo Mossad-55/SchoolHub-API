@@ -189,4 +189,29 @@ public static class RepositoryExtensions
 
         return attendances.OrderBy(orderQuery);
     }
+
+    // Assignment search & sort
+    public static IQueryable<Assignment> Search(this IQueryable<Assignment> assignments, string searchTerm)
+    {
+        if (string.IsNullOrWhiteSpace(searchTerm))
+            return assignments;
+
+        var lowerCaseTerm = searchTerm.Trim().ToLower();
+
+        return assignments.Where(a =>
+            (a.Title != null && a.Title.ToLower().Contains(lowerCaseTerm)) || 
+            (a.Description != null && a.Description.ToLower().Contains(lowerCaseTerm)));
+    }
+
+    public static IQueryable<Assignment> Sort(this IQueryable<Assignment> assignments, string orderByQueryString)
+    {
+        if (string.IsNullOrWhiteSpace(orderByQueryString))
+            return assignments.OrderBy(c => c.CreatedDate);
+
+        var orderQuery = OrderQueryBuilder.CreateOrderQuery<Assignment>(orderByQueryString);
+        if (string.IsNullOrWhiteSpace(orderQuery))
+            return assignments.OrderBy(c => c.CreatedDate);
+
+        return assignments.OrderBy(orderQuery);
+    }
 }
