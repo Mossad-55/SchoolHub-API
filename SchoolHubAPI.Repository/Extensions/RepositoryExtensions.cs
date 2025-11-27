@@ -214,4 +214,17 @@ public static class RepositoryExtensions
 
         return assignments.OrderBy(orderQuery);
     }
+
+    // Submission sort
+    public static IQueryable<Submission> Sort(this IQueryable<Submission> submissions, string orderByQueryString)
+    {
+        if (string.IsNullOrWhiteSpace(orderByQueryString))
+            return submissions.OrderBy(s => s.SubmittedDate);
+
+        var orderQuery = OrderQueryBuilder.CreateOrderQuery<Submission>(orderByQueryString);
+        if (string.IsNullOrWhiteSpace(orderQuery))
+            return submissions.OrderBy(s => s.SubmittedDate);
+
+        return submissions.OrderBy(orderQuery);
+    }
 }
