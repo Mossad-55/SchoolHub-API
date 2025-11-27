@@ -12,10 +12,6 @@ internal sealed class AssignmentRepository : RepositoryBase<Assignment>, IAssign
     {
     }
 
-    public async Task<bool> CheckIfAssignmentExistsAsync(Guid batchId, bool trackChanges) =>
-        await FindByCondition(a => a.BatchId == batchId, trackChanges)
-            .SingleOrDefaultAsync() != null;
-
     public void CreateAssignment(Assignment assignment) => Create(assignment);
 
     public void DeleteAssignment(Assignment assignment) => Delete(assignment);
