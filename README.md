@@ -1,117 +1,286 @@
-# SchoolHub API
+---
+# SchoolHub‑API
 
-A backend API built using **.NET Core Web API** to manage **students, teachers, courses, classes, attendance, and grading** with **role‑based authentication**, clean architecture principles, and relational database design.
+A backend API built with .NET Web API to manage Students, Teachers, Courses, Batches, Departments, Attendance, Grading — with role‑based authentication, clean architecture, and relational database design.
 
 ---
 
-## 🚀 Tech Stack
+## 📚 Overview
 
-- **.NET 9 Web API** – Core backend framework.
-- **Entity Framework Core** – ORM for database operations.
-- **ASP.NET Core Identity** – Authentication & authorization.
-- **JWT Authentication** – Role-based access control.
-- **Global Exception Handling Middleware** – Unified API error responses.
-- **NLog** – Centralized logging provider.
-- **FluentValidation** – Request validation.
-- **AutoMapper** – DTO mapping.
-- **Swagger / OpenAPI** – API documentation.
----
+SchoolHub‑API serves as the backend for a school management system — supporting multiple roles (Admin, Teacher, Student), structured layers (repositories, services, presentation), and common educational workflows such as:
 
-## 📁 Project Structure
+- Course & batch management
+- User management (registration, login, roles)
+- Soft‑delete / activate / deactivate for entities (users, courses, etc.)
+- Role-based access to endpoints (Admin, Teacher, Student)
+- Logging, validation, and error handling for robustness
 
-```
-SchoolHub/
-├── SchoolHub.Presentation      # Controllers, endpoints, filters, exception handling
-├── SchoolHub.Contracts         # DTOs, request/response models
-├── SchoolHub.Entities          # Domain entities & enums
-├── SchoolHub.LoggerService     # NLog-based logging abstraction
-├── SchoolHub.Repository        # Data access layer (EF Core repositories)
-├── SchoolHub.Service           # Business logic implementations
-├── SchoolHub.Service.Contracts # Interfaces for service layer
-└── SchoolHub.Shared            # Shared helpers, constants, utilities
-```
-
-
-
-Uses **Clean/Onion architecture** for maintainability and testability.
+This API can be paired with any frontend (web, mobile) to build a full-fledged school management application.
 
 ---
 
-## ⚙️ Setup Instructions
+## 🧰 Tech Stack
 
-### 1️⃣ Clone the Repository
+- **.NET 9 Web API** – core backend framework
+- **Entity Framework Core** – ORM for database operations
+- **ASP.NET Core Identity** – authentication & authorization (roles)
+- **JWT Authentication** – stateless authentication using tokens
+- **AutoMapper** – mapping between entities and DTOs
+- **FluentValidation** – validating incoming requests
+- **Global Exception Handling Middleware** – consistent error responses
+- **NLog / Custom Logger Service** – centralized logging
+- **Swagger / OpenAPI** – API documentation & testing
+- **Clean / Onion Architecture** – for maintainability and testability
+
+---
+
+## 🏗️ Project Structure
+
+```
+SchoolHub‑API/
+├── SchoolHub.Presentation       # Controllers, endpoints, filters, exception handling
+├── SchoolHub.Contracts          # DTOs, request/response models
+├── SchoolHub.Entities           # Domain entities & enums
+├── SchoolHub.LoggerService      # Logging abstraction (NLog or custom)
+├── SchoolHub.Repository         # Data access layer (EF Core repositories)
+├── SchoolHub.Service            # Business logic implementations
+├── SchoolHub.Service.Contracts  # Interfaces for service layer
+└── SchoolHub.Shared             # Shared helpers, constants, utilities
 ```
 
+Follows Clean/Onion architecture for clear separation of concerns, easier testing, and maintainability.
+
+---
+
+## ⚙️ Setup & Running Locally
+
+1. **Clone the repository**
+
+```bash
 git clone https://github.com/Mossad-55/SchoolHub-API.git
 cd SchoolHub-API
-
 ```
 
-### 2️⃣ Configure Your Database
-Update the connection string in:
-```
+2. **Configure the database connection**  
+   Update `appsettings.json` with your SQL Server / database connection settings:
 
-SchoolHubApi/appsettings.json
-
-````
-Example:
 ```json
 "ConnectionStrings": {
   "DefaultConnection": "Server=.;Database=SchoolHubDb;Trusted_Connection=True;TrustServerCertificate=True;"
 }
-````
-
-### 3️⃣ Apply Migrations
-
 ```
+
+3. **Run EF Core migrations to create the database schema**
+
+```bash
 dotnet ef database update
 ```
 
-### 4️⃣ Run the Application
+4. **Run the application**
 
-```
+```bash
 dotnet run --project SchoolHub.API
 ```
 
-API will be available at:
+5. **Access the API**  
+   Base URL (default): `https://localhost:5001`  
+   Swagger UI: `https://localhost:5001/swagger` — for interactive documentation and testing
+
+---
+
+## 🔐 Authentication & Roles
+
+- Authentication is done using JWT tokens.
+- Default roles: `Admin`, `Teacher`, `Student`.
+- Include the token in request header:
 
 ```
-https://localhost:5001
+Authorization: Bearer <your_token>
 ```
 
-Swagger UI:
+- Role-based authorization ensures only authorized roles can access endpoints.
 
+---
+
+## ✅ Features & Functionality
+
+- User registration, login, role assignment (Admin / Teacher / Student)
+- CRUD for Courses, Batches (with soft‑delete support)
+- Role‑based authorization (Admin, Teacher, Student) throughout controllers
+- Soft‑delete and activation/deactivation for entities (e.g., Users, Courses)
+- Pagination, filtering (search, sort) for listing endpoints
+- DTO mapping with AutoMapper for clean data transfer
+- Validation of request payloads with FluentValidation
+- Centralized logging & error handling
+- Swagger/OpenAPI for API documentation
+
+---
+
+## 📝 Sample API Requests (Postman Examples)
+
+### 1. Login (to get JWT token)
+
+**POST** `/api/auth/login`
+
+Request Body:
+
+```json
+{
+  "email": "admin@example.com",
+  "password": "Admin123!"
+}
 ```
-https://localhost:5001/swagger
+
+Response:
+
+```json
+{
+  "accessToken": "<jwt_token_here>",
+  "refreshToken": "<refresh_token_here>",
+  "expiresAt": "2025-12-01T10:00:00Z",
+  "role": "Admin",
+  "userId": "guid-here",
+  "email": "admin@example.com"
+}
 ```
 
 ---
 
-## 🔑 Authentication & Roles
+### 2. Register a New User (Admin only)
 
-The API uses **JWT tokens**.
-Roles:
+**POST** `/api/auth/register`
 
-- **Admin** – Full access
-- **Teacher** – Manage classes, attendance, grading
-- **Student** – View grades, courses, profile
+Request Body:
 
-Login via `/auth/login` to obtain a token.
-
-Attach the token in headers:
-
+```json
+{
+  "email": "teacher1@example.com",
+  "password": "Teacher123!",
+  "name": "John Doe",
+  "role": "Teacher"
+}
 ```
-Authorization: Bearer your_token_here
+
+Response:
+
+```json
+{
+  "succeeded": true,
+  "errors": []
+}
 ```
 
 ---
 
-## 📘 How to Use the Repository
+### 3. Get All Courses (Active only)
 
-- Explore the **Controllers** folder for available endpoints.
-- Review the **Domain** layer to understand the relational model.
-- Use the **Application** layer to add or modify business logic.
-- Use **Infrastructure** for any database or external integrations.
-- Check **Swagger UI** for live API testing.
+**GET** `/api/departments/{departmentId}/courses`
 
-Happy coding! 🎓
+Headers:
+
+```
+Authorization: Bearer <jwt_token_here>
+```
+
+Response:
+
+```json
+[
+  {
+    "id": "course-guid",
+    "name": "Mathematics 101",
+    "isActive": true,
+    "departmentId": "department-guid"
+  }
+]
+```
+
+---
+
+### 4. Create a Batch (Teacher / Admin)
+
+**POST** `/api/courses/{courseId}/batches`
+
+Request Body:
+
+```json
+{
+  "name": "Batch A",
+  "startDate": "2025-12-01",
+  "endDate": "2026-06-30"
+}
+```
+
+Response:
+
+```json
+{
+  "id": "batch-guid",
+  "name": "Batch A",
+  "courseId": "course-guid",
+  "isActive": true
+}
+```
+
+---
+
+### 5. Soft Delete a Course (Admin only)
+
+**PATCH** `/api/departments/{departmentId}/courses/{courseId}/deactivate`
+
+Headers:
+
+```
+Authorization: Bearer <jwt_token_here>
+```
+
+Response:
+
+```json
+204 No Content
+```
+
+- Marks course as `IsActive = false`.
+- Admin and Head of Department receive notifications automatically.
+
+---
+
+### 6. Activate Course
+
+**PATCH** `/api/departments/{departmentId}/courses/{courseId}/activate`
+
+---
+
+## 🧑‍💻 How To Contribute
+
+- Explore **Controllers** to see endpoints
+- Extend **Service** + **Repository** layer for new features
+- Use **DTOs** for request/response consistency
+- Open Issues or Pull Requests for improvements or bug fixes
+
+---
+
+## 📄 API Documentation
+
+- Swagger UI available at `https://localhost:5001/swagger`
+- All endpoints documented and testable
+- Use JWT token to access secured endpoints
+
+---
+
+## 🎯 Why This Project Is Interview‑Ready
+
+- Demonstrates **modern .NET backend skills** (Identity, JWT, EF Core, Clean Architecture)
+- Covers **soft-delete patterns**, **role-based authorization**, **validation**, **logging**
+- Showcases **layered design** with repositories, services, controllers
+- Ready to extend for a full school management system
+
+---
+
+## 🗣️ Contact / Maintainer
+
+For questions or collaboration — open an issue or PR.
+
+Happy coding! 🚀
+
+---
