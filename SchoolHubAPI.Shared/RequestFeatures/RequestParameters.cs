@@ -19,5 +19,6 @@ public class RequestParameters
     }
 
     public string? OrderBy { get; set; } = "name";
+    public bool? IsActive { get; set; } = true;
     public string? SearchTerm { get; set; }
 }

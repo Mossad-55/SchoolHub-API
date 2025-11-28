@@ -24,7 +24,7 @@ internal sealed class AdminRepository : RepositoryBase<Admin>, IAdminRepository
 
     public async Task<PagedList<Admin>>? GetAllAdminsAsync(RequestParameters requestParameters, bool trackChanges)
     {
-        var admins = await FindAll(trackChanges)
+        var admins = await FindByCondition(s => s.User!.IsActive == requestParameters.IsActive, trackChanges)
             .Search(requestParameters.SearchTerm!)
             .Sort(requestParameters.OrderBy!)
             .Include(a => a.User)

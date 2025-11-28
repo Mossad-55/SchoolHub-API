@@ -19,7 +19,7 @@ internal sealed class TeacherRepository : RepositoryBase<Teacher>, ITeacherRepos
 
     public async Task<PagedList<Teacher>>? GetAllTeachersAsync(RequestParameters requestParameters, bool trackChanges)
     {
-        var teachers = await FindAll(trackChanges)
+        var teachers = await FindByCondition(t => t.User!.IsActive == requestParameters.IsActive, trackChanges)
             .Search(requestParameters.SearchTerm!)
             .Sort(requestParameters.OrderBy!)
             .Include(t => t.User)

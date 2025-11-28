@@ -3,8 +3,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using SchoolHubAPI.Presentation.ActionFilters;
 using SchoolHubAPI.Service.Contracts;
+using SchoolHubAPI.Shared;
 using SchoolHubAPI.Shared.DTOs.Course;
 using SchoolHubAPI.Shared.RequestFeatures;
+using System.Security.Claims;
 using System.Text.Json;
 
 namespace SchoolHubAPI.Presentation.Controllers;
@@ -24,12 +26,25 @@ public class CoursesController : ControllerBase
         _memoryCache = memoryCache;
     }
 
+    // Private Functions
+    private RecipientRole GetCurrentUserRole()
+    {
+        var claim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role || c.Type == "role")?.Value;
+        if (claim == null || !Enum.TryParse<RecipientRole>(claim, true, out var role))
+            return RecipientRole.Student; // default fallback
+        return role;
+    }
+
     private string GetCacheKey(Guid departmentId) => $"Courses_{departmentId}";
 
     [HttpGet]
     [Authorize(Roles = "Admin, Teacher, Student")]
     public async Task<IActionResult> GetCourses(Guid departmentId, [FromQuery] RequestParameters requestParameters)
     {
+        var role = GetCurrentUserRole();
+        if (role.Equals(RecipientRole.Student) || role.Equals(RecipientRole.Teacher))
+            requestParameters.IsActive = true;
+
         var cacheKey = GetCacheKey(departmentId);
 
         if (!_memoryCache.TryGetValue(cacheKey, out (IEnumerable<CourseDto> Courses, MetaData MetaData) cachedCourses))

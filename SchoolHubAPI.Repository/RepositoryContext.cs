@@ -17,6 +17,9 @@ public class RepositoryContext : IdentityDbContext<User, IdentityRole<Guid>, Gui
     {
         base.OnModelCreating(modelBuilder);
 
+        modelBuilder.Entity<User>()
+            .HasQueryFilter(u => u.IsActive); // default return active users (Admins, Teachers, Students)
+
         modelBuilder.Entity<Course>()
             .HasIndex(c => new { c.DepartmentId, c.Code })
             .IsUnique();

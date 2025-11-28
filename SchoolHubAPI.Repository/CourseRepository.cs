@@ -23,7 +23,7 @@ internal sealed class CourseRepository : RepositoryBase<Course>, ICourseReposito
 
     public async Task<PagedList<Course>>? GetAllCoursesAsync(Guid departmentId, RequestParameters requestParameters, bool trackChanges)
     {
-        var courses = await FindByCondition(c => c.DepartmentId == departmentId, trackChanges)
+        var courses = await FindByCondition(c => c.DepartmentId == departmentId && c.IsActive == requestParameters.IsActive , trackChanges)
             .Search(requestParameters.SearchTerm!)
             .Sort(requestParameters.OrderBy!)
             .ToListAsync();

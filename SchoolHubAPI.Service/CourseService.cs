@@ -120,16 +120,27 @@ internal sealed class CourseService : ICourseService
 
     public async Task DeleteAsync(Guid departmentId, Guid id, bool depTrackChanges, bool courseTrackChanges)
     {
-        _logger.LogInfo($"Deleting course {id} from department {departmentId}.");
+        _logger.LogInfo($"Soft-deleting course {id} from department {departmentId}.");
 
+        // Ensure department exists
         await EnsureDepartmentExistsAsync(departmentId, depTrackChanges);
 
+        // Get course entity
         var courseEntity = await GetCourseForDepartment(departmentId, id, courseTrackChanges);
 
-        _repository.Course.DeleteCourse(courseEntity);
-        await _repository.SaveChangesAsync();
+        if (!courseEntity.IsActive)
+        {
+            _logger.LogWarn($"Course {id} is already inactive.");
 
-        _logger.LogInfo($"Course {id} deleted from department {departmentId}.");
+            throw new CourseIsAlreadyInActiveException(id);
+        }
+
+        // Soft delete
+        courseEntity.IsActive = false;
+        courseEntity.UpdatedDate = DateTime.UtcNow;
+
+        await _repository.SaveChangesAsync();
+        _logger.LogInfo($"Course {id} soft-deleted from department {departmentId}.");
 
         // --- Notifications ---
         var department = await _repository.Department.GetDepartmentAsync(departmentId, false);
@@ -137,7 +148,7 @@ internal sealed class CourseService : ICourseService
         var adminNotification = new Notification
         {
             Title = "Course Deleted",
-            Message = $"Course '{courseEntity.Name}' deleted from department '{departmentId}'.",
+            Message = $"Course '{courseEntity.Name}' was deleted from department '{departmentId}'.",
             RecipientRole = RecipientRole.Admin,
             CreatedDate = DateTime.UtcNow
         };
@@ -159,6 +170,7 @@ internal sealed class CourseService : ICourseService
         await _repository.SaveChangesAsync();
         // -------------------
     }
+
 
     public async Task<(IEnumerable<CourseDto> CourseDtos, MetaData MetaData)> GetAllAsync(Guid departmentId, RequestParameters requestParameters, bool depTrackChanges, bool courseTrackChanges)
     {

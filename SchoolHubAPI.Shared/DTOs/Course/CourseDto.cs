@@ -9,4 +9,5 @@ public record CourseDto
     public int Credits { get; set; }
     public string? CreatedDate { get; set; }
     public string? UpdatedDate { get; set; }
+    public bool? IsActive { get; set; }
 }

@@ -13,6 +13,7 @@ public class Course
     public int Credits { get; set; }
     public DateTime? CreatedDate { get; set; }
     public DateTime? UpdatedDate { get; set; }
+    public bool IsActive { get; set; } = true;
 
     public Guid DepartmentId { get; set; }
     [ForeignKey("DepartmentId")]

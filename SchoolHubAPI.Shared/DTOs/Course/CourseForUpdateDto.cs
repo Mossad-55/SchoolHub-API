@@ -7,4 +7,5 @@ public record CourseForUpdateDto
     public string? Description { get; set; }
     public int Credits { get; set; }
     public DateTime? UpdatedDate { get; set; } = DateTime.UtcNow;
+    public bool? IsActive { get; set; }
 }

@@ -7,4 +7,5 @@ public record TeacherDto
     public string? Name { get; set; }
     public string? CreatedDate { get; set; }
     public string? UpdatedDate { get; set; }
+    public bool? IsActive { get; set; }
 }

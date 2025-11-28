@@ -43,7 +43,7 @@ internal sealed class AuthenticationService : IAuthenticationService
 
     public async Task DeleteUserAsync(Guid userId)
     {
-        _logger.LogInfo($"Attempting to delete user {userId}");
+        _logger.LogInfo($"Attempting to soft-delete user {userId}");
 
         var user = await _userManager.FindByIdAsync(userId.ToString());
         if (user is null)
@@ -52,24 +52,40 @@ internal sealed class AuthenticationService : IAuthenticationService
             throw new UserNotFoundException(userId);
         }
 
-        // Check is the role is Teacher and if they are Head of Department.
-        if (await _userManager.IsInRoleAsync(user, RolesEnum.Teacher.ToString()) 
+        // Prevent deleting Head of Department
+        if (await _userManager.IsInRoleAsync(user, RolesEnum.Teacher.ToString())
             && await _serviceManager.DepartmentService.IsTeacherHeadOfDepartment(userId, trackChanges: false))
         {
             _logger.LogWarn($"Failed to delete user {userId}. Head of Department.");
             throw new RemoveHeadOfDepartmentException(userId);
         }
 
-        var result = await _userManager.DeleteAsync(user);
-        if (!result.Succeeded)
+        // Soft delete
+        if (!user.IsActive)
         {
-            var errors = string.Join("; ", result.Errors.Select(e => e.Description));
-            _logger.LogError($"Failed to delete user {userId}. Errors: {errors}");
+            _logger.LogWarn($"User {userId} is already inactive");
+
+            throw new UserIsAlreadyInActiveException(userId);
+        }
+
+        user.IsActive = false;
+        user.UpdatedDate = DateTime.UtcNow;
+
+        // clearing refresh token and expiry.
+        user.RefreshToken = null;
+        user.RefreshTokenExpiryDate = null;
+
+        var updateResult = await _userManager.UpdateAsync(user);
+        if (!updateResult.Succeeded)
+        {
+            var errors = string.Join("; ", updateResult.Errors.Select(e => e.Description));
+            _logger.LogError($"Failed to soft-delete user {userId}. Errors: {errors}");
             throw new FailedToDeleteUserException(userId);
         }
 
-        _logger.LogInfo($"Successfully deleted user {userId}");
+        _logger.LogInfo($"Successfully soft-deleted user {userId}");
     }
+
 
     public async Task<TokenDto> GenerateRefreshTokenAsync(TokenDto tokenDto)
     {
@@ -83,6 +99,9 @@ internal sealed class AuthenticationService : IAuthenticationService
             _logger.LogWarn("Refresh token generation failed: user (from token) not found");
             throw new InvalidRefreshTokenException();
         }
+
+        if (!user.IsActive)
+            throw new UserNotAcvticeException();
 
         if (user.RefreshToken != tokenDto.RefreshToken || user.RefreshTokenExpiryDate <= DateTime.Now)
         {
@@ -144,6 +163,9 @@ internal sealed class AuthenticationService : IAuthenticationService
             _logger.LogWarn($"Login failed: email not found '{loginDto.Email}'");
             throw new WrongEmailOrPasswordException();
         }
+
+        if (!_user.IsActive)
+            throw new UserNotAcvticeException();
 
         var result = await _userManager.CheckPasswordAsync(_user, loginDto.Password ?? string.Empty);
         if (!result)
@@ -235,6 +257,9 @@ internal sealed class AuthenticationService : IAuthenticationService
             _logger.LogWarn($"Update failed. User not found: {userId}");
             throw new UserNotFoundException(userId);
         }
+
+        if (!userEntity.IsActive)
+            throw new UserNotAcvticeException();
 
         // Mapping
         _mapper.Map(userEntity, updateDto);
