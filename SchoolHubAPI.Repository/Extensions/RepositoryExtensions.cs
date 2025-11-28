@@ -227,4 +227,29 @@ public static class RepositoryExtensions
 
         return submissions.OrderBy(orderQuery);
     }
+
+    // Notification search & sort
+    public static IQueryable<Notification> Search(this IQueryable<Notification> notifications, string searchTerm)
+    {
+        if (string.IsNullOrWhiteSpace(searchTerm))
+            return notifications;
+
+        var lowerCaseTerm = searchTerm.Trim().ToLower();
+
+        return notifications.Where(n =>
+            (n.Title != null && n.Title.ToLower().Contains(lowerCaseTerm)) ||
+            (n.Message != null && n.Message.ToLower().Contains(lowerCaseTerm)));
+    }
+
+    public static IQueryable<Notification> Sort(this IQueryable<Notification> notifications, string orderByQueryString)
+    {
+        if (string.IsNullOrWhiteSpace(orderByQueryString))
+            return notifications.OrderBy(c => c.CreatedDate);
+
+        var orderQuery = OrderQueryBuilder.CreateOrderQuery<Notification>(orderByQueryString);
+        if (string.IsNullOrWhiteSpace(orderQuery))
+            return notifications.OrderBy(c => c.CreatedDate);
+
+        return notifications.OrderBy(orderQuery);
+    }
 }
