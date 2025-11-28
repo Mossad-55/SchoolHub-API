@@ -37,4 +37,5 @@ public class RepositoryContext : IdentityDbContext<User, IdentityRole<Guid>, Gui
     public DbSet<Attendance>? Attendances { get; set; }
     public DbSet<Assignment>? Assignments { get; set; }
     public DbSet<Submission>? Submissions { get; set; }
+    public DbSet<Notification>? Notifications { get; set; }
 }

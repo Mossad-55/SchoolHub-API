@@ -7,6 +7,7 @@ using SchoolHubAPI.Shared.DTOs.Attendance;
 using SchoolHubAPI.Shared.DTOs.Batch;
 using SchoolHubAPI.Shared.DTOs.Course;
 using SchoolHubAPI.Shared.DTOs.Department;
+using SchoolHubAPI.Shared.DTOs.Notification;
 using SchoolHubAPI.Shared.DTOs.Student;
 using SchoolHubAPI.Shared.DTOs.StudentBatch;
 using SchoolHubAPI.Shared.DTOs.Submission;
@@ -182,6 +183,13 @@ public class MappingProfile : Profile
         CreateMap<SubmissionForCreationDto, Submission>();
         CreateMap<SubmissionForUpdateDto, Submission>();
         CreateMap<GradeSubmissionForUpdateDto, Submission>();
+
+        // Notification Mapping
+        CreateMap<Notification, NotificationDto>()
+            .ForMember(n => n.CreatedDate,
+                opts => opts.MapFrom(src => FormatDateAndTime(src.CreatedDate)));
+        CreateMap<NotificationForCreationDto, Notification>();
+        CreateMap<NotificationForUpdateDto, Notification>();
     }
 
     private static string FormatDate(DateTime? dt) =>
