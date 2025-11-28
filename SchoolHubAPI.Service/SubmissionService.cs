@@ -43,6 +43,22 @@ internal sealed class SubmissionService : ISubmissionService
         await _repository.SaveChangesAsync();
 
         _logger.LogInfo($"Submission {id} deleted successfully for assignment {assignmentId}");
+
+        // Notify teacher
+        var assignment = await _repository.Assignment.GetByIdAsync(assignmentId, assignmentTrackChanges);
+        if (assignment?.CreatedByTeacherId != null)
+        {
+            var teacherNotification = new Notification
+            {
+                Title = "Submission Deleted",
+                Message = $"Student '{studentId}' deleted submission '{id}' for assignment '{assignmentId}'.",
+                RecipientRole = RecipientRole.Teacher,
+                RecipientId = assignment.CreatedByTeacherId,
+                CreatedDate = DateTime.UtcNow
+            };
+            _repository.Notification.AddNotification(teacherNotification);
+            await _repository.SaveChangesAsync();
+        }
     }
 
     public async Task<(IEnumerable<SubmissionDto> SubmissionDtos, MetaData MetaData)> GetAllForAssignmentAsync(Guid assignmentId, RequestParameters requestParameters, bool assignmentTrackChanges, bool subTrackChanges)
@@ -94,6 +110,23 @@ internal sealed class SubmissionService : ISubmissionService
 
         _logger.LogInfo($"Student {studentId} submitted assignment {assignmentId} successfully");
 
+        // --- Notification to Teacher(s) of the assignment ---
+        var assignment = await _repository.Assignment.GetByIdAsync(assignmentId, assignmentTrackChanges);
+        if (assignment?.CreatedByTeacherId != null)
+        {
+            var teacherNotification = new Notification
+            {
+                Title = "New Submission",
+                Message = $"Student '{studentId}' submitted assignment '{assignmentId}'.",
+                RecipientRole = RecipientRole.Teacher,
+                RecipientId = assignment.CreatedByTeacherId,
+                CreatedDate = DateTime.UtcNow
+            };
+            _repository.Notification.AddNotification(teacherNotification);
+            await _repository.SaveChangesAsync();
+        }
+        // --------------------------------------------
+
         return _mapper.Map<SubmissionDto>(submissionEntity);
     }
 
@@ -111,6 +144,19 @@ internal sealed class SubmissionService : ISubmissionService
         await _repository.SaveChangesAsync();
 
         _logger.LogInfo($"Submission {id} graded by teacher {teacherId} for assignment {assignmentId}");
+
+        // --- Notification to Student ---
+        var studentNotification = new Notification
+        {
+            Title = "Assignment Graded",
+            Message = $"Your submission '{id}' for assignment '{assignmentId}' has been graded by teacher '{teacherId}'.",
+            RecipientRole = RecipientRole.Student,
+            RecipientId = submissionEntity.StudentId,
+            CreatedDate = DateTime.UtcNow
+        };
+        _repository.Notification.AddNotification(studentNotification);
+        await _repository.SaveChangesAsync();
+        // --------------------------------------------
     }
 
     public async Task UpdateAsync(Guid assignmentId, Guid studentId, Guid id, SubmissionForUpdateDto updateDto, bool assignmentTrackChanges, bool subTrackChanges)
@@ -131,6 +177,22 @@ internal sealed class SubmissionService : ISubmissionService
         await _repository.SaveChangesAsync();
 
         _logger.LogInfo($"Submission {id} updated successfully for assignment {assignmentId}");
+
+        // Notify teacher
+        var assignment = await _repository.Assignment.GetByIdAsync(assignmentId, assignmentTrackChanges);
+        if (assignment?.CreatedByTeacherId != null)
+        {
+            var teacherNotification = new Notification
+            {
+                Title = "Submission Updated",
+                Message = $"Student '{studentId}' updated submission '{id}' for assignment '{assignmentId}'.",
+                RecipientRole = RecipientRole.Teacher,
+                RecipientId = assignment.CreatedByTeacherId,
+                CreatedDate = DateTime.UtcNow
+            };
+            _repository.Notification.AddNotification(teacherNotification);
+            await _repository.SaveChangesAsync();
+        }
     }
 
     // Private Functions

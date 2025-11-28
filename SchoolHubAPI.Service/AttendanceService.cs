@@ -41,14 +41,23 @@ internal sealed class AttendanceService : IAttendanceService
         attendanceEntity.BatchId = batchId;
 
         _repository.Attendance.AddAttendanceAsync(attendanceEntity);
-
         await _repository.SaveChangesAsync();
 
         _logger.LogInfo($"Attendance for student with id: {creationDto.StudentId} was created for batch {batchId}.");
 
-        var attendanceDto = _mapper.Map<AttendanceDto>(attendanceEntity);
+        // Notify the student
+        var notification = new Notification
+        {
+            Title = "Attendance Marked",
+            Message = $"Your attendance for batch {batchId} has been marked.",
+            RecipientRole = RecipientRole.Student,
+            RecipientId = creationDto.StudentId,
+            CreatedDate = DateTime.UtcNow
+        };
+        _repository.Notification.AddNotification(notification);
+        await _repository.SaveChangesAsync();
 
-        return attendanceDto;
+        return _mapper.Map<AttendanceDto>(attendanceEntity);
     }
 
     public async Task DeleteAttendanceAsync(Guid batchId, Guid teacherId, Guid id, bool batchTrackChanges, bool attTrackChanges)
@@ -65,10 +74,21 @@ internal sealed class AttendanceService : IAttendanceService
             throw new AttendanceNotForTeacherException(teacherId);
 
         _repository.Attendance.RemoveAttendanceAsync(attendanceEntity);
-
         await _repository.SaveChangesAsync();
 
         _logger.LogInfo($"Attendance with id: {id} is removed.");
+
+        // Notify the student
+        var notification = new Notification
+        {
+            Title = "Attendance Removed",
+            Message = $"Your attendance for batch {batchId} has been removed.",
+            RecipientRole = RecipientRole.Student,
+            RecipientId = attendanceEntity.StudentId,
+            CreatedDate = DateTime.UtcNow
+        };
+        _repository.Notification.AddNotification(notification);
+        await _repository.SaveChangesAsync();
     }
 
     public async Task<(IEnumerable<AttendanceDto> AttendanceDtos, MetaData MetaData)> GetAttendanceForBatchAsync(Guid batchId, RequestParameters requestParameters, bool batchTrackChanges, bool attTrackChanges)
@@ -78,7 +98,6 @@ internal sealed class AttendanceService : IAttendanceService
         await EnsureBatchExists(batchId, batchTrackChanges);
 
         var attendancesWithMetaData = await _repository.Attendance.GetAllForBatchAsync(batchId, requestParameters, attTrackChanges);
-
         var attendanedDtos = _mapper.Map<IEnumerable<AttendanceDto>>(attendancesWithMetaData);
 
         return (attendanedDtos, attendancesWithMetaData.MetaData);
@@ -94,11 +113,7 @@ internal sealed class AttendanceService : IAttendanceService
         if (attendanceEntity is null)
             throw new AttendanceNotFoundException(id);
 
-        var attendanceDto = _mapper.Map<AttendanceDto>(attendanceEntity);
-
-        _logger.LogInfo($"Retrieved attendance with id: {id} for batch {batchId}.");
-
-        return attendanceDto;
+        return _mapper.Map<AttendanceDto>(attendanceEntity);
     }
 
     public async Task<AttendanceDto> GetAttendanceForStudentAsync(Guid batchId, Guid studentId, bool batchTrackChanges, bool attTrackChanges)
@@ -108,12 +123,10 @@ internal sealed class AttendanceService : IAttendanceService
         await EnsureBatchExists(batchId, batchTrackChanges);
 
         var attendanceEntity = await _repository.Attendance.GetAttendanceForStudenthAsync(batchId, studentId, attTrackChanges);
-        if(attendanceEntity is null)
+        if (attendanceEntity is null)
             throw new AttendanceNotFoundException(studentId);
 
-        var attendanedDto = _mapper.Map<AttendanceDto>(attendanceEntity);
-
-        return attendanedDto;
+        return _mapper.Map<AttendanceDto>(attendanceEntity);
     }
 
     public async Task UpdateAttendanceAsync(Guid batchId, Guid teacherId, Guid id, AttendanceForUpdateDto updateDto, bool batchTrackChanges, bool attTrackChanges)
@@ -130,10 +143,21 @@ internal sealed class AttendanceService : IAttendanceService
             throw new AttendanceNotForTeacherException(teacherId);
 
         _mapper.Map(attendanceEntity, updateDto);
-
         await _repository.SaveChangesAsync();
 
-        _logger.LogInfo($"Update attendance with id: {id} succssefully.");
+        _logger.LogInfo($"Update attendance with id: {id} successfully.");
+
+        // Notify the student
+        var notification = new Notification
+        {
+            Title = "Attendance Updated",
+            Message = $"Your attendance for batch {batchId} has been updated.",
+            RecipientRole = RecipientRole.Student,
+            RecipientId = attendanceEntity.StudentId,
+            CreatedDate = DateTime.UtcNow
+        };
+        _repository.Notification.AddNotification(notification);
+        await _repository.SaveChangesAsync();
     }
 
     // Private Functions

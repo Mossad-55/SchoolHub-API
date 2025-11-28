@@ -47,5 +47,10 @@ internal sealed class StudentBatchRepository : RepositoryBase<StudentBatch>, ISt
         return PagedList<StudentBatch>.ToPagedList(studentBatches, requestParameters.PageNumber, requestParameters.PageSize);
     }
 
+    public async Task<IEnumerable<Guid>> GetStudentIdsForBatchAsync(Guid batchId, bool trackChanges) =>
+        await FindByCondition(sb => sb.BatchId == batchId, trackChanges)
+            .Select(sb => sb.StudentId)
+            .ToListAsync();
+
     public void Remove(StudentBatch studentBatch) => Delete(studentBatch);
 }

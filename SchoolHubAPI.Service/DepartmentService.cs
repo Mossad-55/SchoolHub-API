@@ -31,22 +31,32 @@ internal sealed class DepartmentService : IDepartmentService
     {
         _logger.LogInfo($"Creating department '{creationDto.Name}'");
 
-        // Check if department exists
         if (await _repository.Department.CheckIfDepatmentExists(creationDto.Name!.Trim().ToUpperInvariant(), trackChanges))
         {
             _logger.LogWarn($"Department creation failed: department '{creationDto.Name}' already exists");
             throw new DepartmentExistsException(creationDto.Name);
         }
 
-        // Check if head of department is valid
         if (creationDto.HeadOfDepartmentId.HasValue)
             await CheckIfUserExistsAndRole(creationDto.HeadOfDepartmentId.Value);
-        
+
         var departmentEntity = _mapper.Map<Department>(creationDto);
         _repository.Department.CreateDepartment(departmentEntity);
         await _repository.SaveChangesAsync();
 
         _logger.LogInfo($"Department '{departmentEntity.Name}' created (Id: {departmentEntity.Id})");
+
+        // --- Notification ---
+        var notification = new Notification
+        {
+            Title = "Department Created",
+            Message = $"Department '{departmentEntity.Name}' has been created.",
+            RecipientRole = RecipientRole.Admin,
+            CreatedDate = DateTime.UtcNow
+        };
+        _repository.Notification.AddNotification(notification);
+        await _repository.SaveChangesAsync();
+        // -------------------
 
         return _mapper.Map<DepartmentDto>(departmentEntity);
     }
@@ -61,6 +71,18 @@ internal sealed class DepartmentService : IDepartmentService
         await _repository.SaveChangesAsync();
 
         _logger.LogInfo($"Department {id} deleted successfully");
+
+        // --- Notification ---
+        var notification = new Notification
+        {
+            Title = "Department Deleted",
+            Message = $"Department '{departmentEntity.Name}' has been deleted.",
+            RecipientRole = RecipientRole.Admin,
+            CreatedDate = DateTime.UtcNow
+        };
+        _repository.Notification.AddNotification(notification);
+        await _repository.SaveChangesAsync();
+        // -------------------
     }
 
     public async Task<(IEnumerable<DepartmentDto> departmentDtos, MetaData MetaData)> GetAllAsync(RequestParameters requestParameters, bool trackChanges)
@@ -98,23 +120,32 @@ internal sealed class DepartmentService : IDepartmentService
 
         var departmentEntity = await GetDepartment(id, trackChanges);
 
-        // Check if department exists
-        if (await _repository.Department.CheckIfDepatmentExists(updateDto.Name!.Trim().ToUpperInvariant(), trackChanges) 
+        if (await _repository.Department.CheckIfDepatmentExists(updateDto.Name!.Trim().ToUpperInvariant(), trackChanges)
             && updateDto.Name != departmentEntity.Name)
         {
             _logger.LogWarn($"Department update failed: department '{updateDto.Name}' already exists");
             throw new DepartmentExistsException(updateDto.Name);
         }
 
-        // Check if head of department is valid
         if (updateDto.HeadOfDepartmentId.HasValue)
             await CheckIfUserExistsAndRole(updateDto.HeadOfDepartmentId.Value);
 
         _mapper.Map(updateDto, departmentEntity);
-
         await _repository.SaveChangesAsync();
 
         _logger.LogInfo($"Department {id} updated successfully");
+
+        // --- Notification ---
+        var notification = new Notification
+        {
+            Title = "Department Updated",
+            Message = $"Department '{departmentEntity.Name}' has been updated.",
+            RecipientRole = RecipientRole.Admin,
+            CreatedDate = DateTime.UtcNow
+        };
+        _repository.Notification.AddNotification(notification);
+        await _repository.SaveChangesAsync();
+        // -------------------
     }
 
 

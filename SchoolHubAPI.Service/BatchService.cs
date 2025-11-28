@@ -4,6 +4,7 @@ using SchoolHubAPI.Contracts;
 using SchoolHubAPI.Entities.Entities;
 using SchoolHubAPI.Entities.Exceptions;
 using SchoolHubAPI.Service.Contracts;
+using SchoolHubAPI.Shared;
 using SchoolHubAPI.Shared.DTOs.Batch;
 using SchoolHubAPI.Shared.RequestFeatures;
 
@@ -33,14 +34,58 @@ internal sealed class BatchService : IBatchService
 
         var batchEntity = _mapper.Map<Batch>(creationDto);
         batchEntity.CourseId = courseId;
-        batchEntity.TeacherId = teacherId; // Don't need to check for Role or Existance here, (handled in controller for(Role, Token))
+        batchEntity.TeacherId = teacherId;
 
         _repository.Batch.CreateBatch(batchEntity);
         await _repository.SaveChangesAsync();
 
         _logger.LogInfo($"Batch created with id: {batchEntity.Id} in course {batchEntity.CourseId}.");
 
+        // --- Notifications ---
+        var adminNotification = new Notification
+        {
+            Title = "Batch Created",
+            Message = $"New batch '{batchEntity.Name}' created in course '{courseId}'.",
+            RecipientRole = RecipientRole.Admin,
+            CreatedDate = DateTime.UtcNow
+        };
+        _repository.Notification.AddNotification(adminNotification);
+        await _repository.SaveChangesAsync();
+        // -------------------
+
         return _mapper.Map<BatchDto>(batchEntity);
+    }
+
+    public async Task UpdateAsync(Guid courseId, Guid teacherId, Guid id, BatchForUpdateDto updateDto, bool courseTrackChanges, bool batchTrackChanges)
+    {
+        _logger.LogInfo($"Updating batch {id} in course {courseId}.");
+
+        await EnsureCourseExistsAsync(courseId, courseTrackChanges);
+
+        var batchEntity = await GetBatchForCourse(courseId, id, batchTrackChanges);
+        if (batchEntity.TeacherId != teacherId)
+            throw new BatchNotAssignedToTeacherException(id);
+
+        var normalizedName = updateDto.Name?.Trim().ToUpperInvariant() ?? string.Empty;
+        await EnsureBatchNameIsUniqueAsync(courseId, batchEntity.TeacherId, normalizedName, batchTrackChanges, batchEntity.Name);
+
+        _mapper.Map(updateDto, batchEntity);
+
+        await _repository.SaveChangesAsync();
+
+        _logger.LogInfo($"Batch {id} updated in course {courseId}.");
+
+        // --- Notifications ---
+        var adminNotification = new Notification
+        {
+            Title = "Batch Updated",
+            Message = $"Batch '{batchEntity.Name}' updated in course '{courseId}'.",
+            RecipientRole = RecipientRole.Admin,
+            CreatedDate = DateTime.UtcNow
+        };
+        _repository.Notification.AddNotification(adminNotification);
+        await _repository.SaveChangesAsync();
+        // -------------------
     }
 
     public async Task DeleteAsync(Guid courseId, Guid teacherId, Guid id, bool courseTrackChanges, bool batchTrackChanges)
@@ -57,6 +102,84 @@ internal sealed class BatchService : IBatchService
         await _repository.SaveChangesAsync();
 
         _logger.LogInfo($"Batch {id} deleted from course {courseId}.");
+
+        // --- Notifications ---
+        var adminNotification = new Notification
+        {
+            Title = "Batch Deleted",
+            Message = $"Batch '{batchEntity.Name}' deleted from course '{courseId}'.",
+            RecipientRole = RecipientRole.Admin,
+            CreatedDate = DateTime.UtcNow
+        };
+        _repository.Notification.AddNotification(adminNotification);
+        await _repository.SaveChangesAsync();
+        // -------------------
+    }
+
+    public async Task ActivateAsync(Guid courseId, Guid teacherId, Guid id, bool courseTrackChanges, bool batchTrackChanges)
+    {
+        _logger.LogInfo($"Activating batch {id} for course {courseId}.");
+
+        await EnsureCourseExistsAsync(courseId, courseTrackChanges);
+
+        var batchEntity = await GetBatchForCourse(courseId, id, batchTrackChanges);
+        if (batchEntity.TeacherId != teacherId)
+            throw new BatchNotAssignedToTeacherException(id);
+
+        if (batchEntity.IsActive)
+            throw new BatchStatusException("activated");
+
+        batchEntity.IsActive = true;
+        batchEntity.UpdatedDate = DateTime.UtcNow;
+
+        await _repository.SaveChangesAsync();
+
+        _logger.LogInfo($"Batch {id} activated for course {courseId}.");
+
+        // --- Notifications ---
+        var adminNotification = new Notification
+        {
+            Title = "Batch Activated",
+            Message = $"Batch '{batchEntity.Name}' activated in course '{courseId}'.",
+            RecipientRole = RecipientRole.Admin,
+            CreatedDate = DateTime.UtcNow
+        };
+        _repository.Notification.AddNotification(adminNotification);
+        await _repository.SaveChangesAsync();
+        // -------------------
+    }
+
+    public async Task DeActivateAsync(Guid courseId, Guid teacherId, Guid id, bool courseTrackChanges, bool batchTrackChanges)
+    {
+        _logger.LogInfo($"Deactivating batch {id} for course {courseId}.");
+
+        await EnsureCourseExistsAsync(courseId, courseTrackChanges);
+
+        var batchEntity = await GetBatchForCourse(courseId, id, batchTrackChanges);
+        if (batchEntity.TeacherId != teacherId)
+            throw new BatchNotAssignedToTeacherException(id);
+
+        if (!batchEntity.IsActive)
+            throw new BatchStatusException("deactivated");
+
+        batchEntity.IsActive = false;
+        batchEntity.UpdatedDate = DateTime.UtcNow;
+
+        await _repository.SaveChangesAsync();
+
+        _logger.LogInfo($"Batch {id} deactivated for course {courseId}.");
+
+        // --- Notifications ---
+        var adminNotification = new Notification
+        {
+            Title = "Batch Deactivated",
+            Message = $"Batch '{batchEntity.Name}' deactivated in course '{courseId}'.",
+            RecipientRole = RecipientRole.Admin,
+            CreatedDate = DateTime.UtcNow
+        };
+        _repository.Notification.AddNotification(adminNotification);
+        await _repository.SaveChangesAsync();
+        // -------------------
     }
 
     public async Task<(IEnumerable<BatchDto> BatchDtos, MetaData MetaData)> GetAllAsync(Guid courseId, RequestParameters requestParameters, bool courseTrackChanges, bool batchTrackChanges)
@@ -85,66 +208,6 @@ internal sealed class BatchService : IBatchService
         _logger.LogInfo($"Batch {id} retrieved for course {courseId}.");
 
         return batchDto;
-    }
-
-    public async Task UpdateAsync(Guid courseId, Guid teacherId, Guid id, BatchForUpdateDto updateDto, bool courseTrackChanges, bool batchTrackChanges)
-    {
-        _logger.LogInfo($"Updating batch {id} in course {courseId}.");
-
-        await EnsureCourseExistsAsync(courseId, courseTrackChanges);
-
-        var batchEntity = await GetBatchForCourse(courseId, id, batchTrackChanges);
-        if (batchEntity.TeacherId != teacherId)
-            throw new BatchNotAssignedToTeacherException(id);
-        
-        var normalizedName = updateDto.Name?.Trim().ToUpperInvariant() ?? string.Empty;
-        await EnsureBatchNameIsUniqueAsync(courseId, batchEntity.TeacherId, normalizedName, batchTrackChanges, batchEntity.Name);
-
-        _mapper.Map(updateDto, batchEntity);
-
-        await _repository.SaveChangesAsync();
-
-        _logger.LogInfo($"Batch {id} updated in course {courseId}.");
-    }
-
-    public async Task ActivateAsync(Guid courseId, Guid teacherId, Guid id, bool courseTrackChanges, bool batchTrackChanges)
-    {
-        _logger.LogInfo($"Retrieving batch {id} for course {courseId}.");
-        await EnsureCourseExistsAsync(courseId, courseTrackChanges);
-
-        var batchEntity = await GetBatchForCourse(courseId, id, batchTrackChanges);
-        if (batchEntity.TeacherId != teacherId)
-            throw new BatchNotAssignedToTeacherException(id);
-
-        if (batchEntity.IsActive)
-            throw new BatchStatusException("activated");
-
-        batchEntity.IsActive = true;
-        batchEntity.UpdatedDate = DateTime.UtcNow;
-
-        _logger.LogInfo($"Batch {id} has been activated for course {courseId}.");
-
-        await _repository.SaveChangesAsync();
-    }
-
-    public async Task DeActivateAsync(Guid courseId, Guid teacherId, Guid id, bool courseTrackChanges, bool batchTrackChanges)
-    {
-        _logger.LogInfo($"Retrieving batch {id} for course {courseId}.");
-        await EnsureCourseExistsAsync(courseId, courseTrackChanges);
-
-        var batchEntity = await GetBatchForCourse(courseId, id, batchTrackChanges);
-        if (batchEntity.TeacherId != teacherId)
-            throw new BatchNotAssignedToTeacherException(id);
-
-        if (!batchEntity.IsActive)
-            throw new BatchStatusException("deactivated");
-
-        batchEntity.IsActive = false;
-        batchEntity.UpdatedDate = DateTime.UtcNow;
-
-        _logger.LogInfo($"Batch {id} has been deactivated for course {courseId}.");
-
-        await _repository.SaveChangesAsync();
     }
 
     public async Task<(IEnumerable<BatchDto> BatchDtos, MetaData MetaData)> GetAllAsyncForTeacher(Guid teacherId, RequestParameters requestParameters, bool batchTrackChanges)

@@ -17,7 +17,7 @@ internal sealed class StudentBatchService : IStudentBatchService
     private readonly IMapper _mapper;
     private readonly ILoggerManager _logger;
 
-    public StudentBatchService(IRepositoryManager repository, UserManager<User> userManager, 
+    public StudentBatchService(IRepositoryManager repository, UserManager<User> userManager,
         IMapper mapper, ILoggerManager loggerManager)
     {
         _repository = repository;
@@ -31,9 +31,7 @@ internal sealed class StudentBatchService : IStudentBatchService
         _logger.LogInfo($"Enrolling student with id: {studentId} in batch {batchId}.");
 
         await EnsureBatchExists(batchId, batchTrackChanges);
-
         await EnsureStudentExistsWithRole(studentId);
-
         await EnsureStudentNotEnrolledInBatch(studentId, batchId, sbTrackChanges);
 
         var studentBatchEntity = new StudentBatch
@@ -44,10 +42,71 @@ internal sealed class StudentBatchService : IStudentBatchService
         };
 
         _repository.StudentBatch.Enroll(studentBatchEntity);
-
         await _repository.SaveChangesAsync();
 
         _logger.LogInfo($"Student with id: {studentId} enrolled in batch {batchId}.");
+
+        // --- Notifications to Admins and Student ---
+        var adminNotification = new Notification
+        {
+            Title = "Student Enrolled",
+            Message = $"Student '{studentId}' has been enrolled in batch '{batchId}'.",
+            RecipientRole = RecipientRole.Admin,
+            CreatedDate = DateTime.UtcNow
+        };
+        _repository.Notification.AddNotification(adminNotification);
+
+        var studentNotification = new Notification
+        {
+            Title = "Enrollment Confirmation",
+            Message = $"You have been enrolled in batch '{batchId}'.",
+            RecipientRole = RecipientRole.Student,
+            RecipientId = studentId,
+            CreatedDate = DateTime.UtcNow
+        };
+        _repository.Notification.AddNotification(studentNotification);
+
+        await _repository.SaveChangesAsync();
+        // --------------------------------------------
+    }
+
+    public async Task RemoveAsync(Guid batchId, Guid studentId, bool batchTrackChanges, bool sbTrackChanges)
+    {
+        _logger.LogInfo($"Removing student with id: {studentId} from batch {batchId}.");
+
+        await EnsureBatchExists(batchId, batchTrackChanges);
+
+        var studentBatchEntity = await _repository.StudentBatch.GetByIdForBatchAsync(batchId, studentId, sbTrackChanges);
+        if (studentBatchEntity is null)
+            throw new StudentNotInBatchException(studentId, batchId);
+
+        _repository.StudentBatch.Remove(studentBatchEntity);
+        await _repository.SaveChangesAsync();
+
+        _logger.LogInfo($"Student with id: {studentId} is removed from batch {batchId}.");
+
+        // --- Notifications to Admins and Student ---
+        var adminNotification = new Notification
+        {
+            Title = "Student Removed",
+            Message = $"Student '{studentId}' has been removed from batch '{batchId}'.",
+            RecipientRole = RecipientRole.Admin,
+            CreatedDate = DateTime.UtcNow
+        };
+        _repository.Notification.AddNotification(adminNotification);
+
+        var studentNotification = new Notification
+        {
+            Title = "Batch Removal Notice",
+            Message = $"You have been removed from batch '{batchId}'.",
+            RecipientRole = RecipientRole.Student,
+            RecipientId = studentId,
+            CreatedDate = DateTime.UtcNow
+        };
+        _repository.Notification.AddNotification(studentNotification);
+
+        await _repository.SaveChangesAsync();
+        // --------------------------------------------
     }
 
     public async Task<(IEnumerable<StudentBatchDto> StudentBatchDtos, MetaData MetaData)> GetAllAsync(Guid batchId, RequestParameters requestParameters, bool batchTrackChanges, bool sbTrackChanges)
@@ -85,23 +144,6 @@ internal sealed class StudentBatchService : IStudentBatchService
         return _mapper.Map<StudentBatchDto>(studentBatchEntity);
     }
 
-    public async Task RemoveAsync(Guid batchId, Guid studentId, bool batchTrackChanges, bool sbTrackChanges)
-    {
-        _logger.LogInfo($"Removing student with id: {studentId} from batch {batchId}.");
-
-        await EnsureBatchExists(batchId, batchTrackChanges);
-
-        var studentBatchEntity = await _repository.StudentBatch.GetByIdForBatchAsync(batchId, studentId, sbTrackChanges);
-        if (studentBatchEntity is null)
-            throw new StudentNotInBatchException(studentId, batchId);
-
-        _repository.StudentBatch.Remove(studentBatchEntity);
-
-        await _repository.SaveChangesAsync();
-
-        _logger.LogInfo($"Student with id: {studentId} is removed from batch {batchId}.");
-    }
-
     // Private Functions
     private async Task EnsureBatchExists(Guid batchId, bool trackChanges)
     {
@@ -118,14 +160,14 @@ internal sealed class StudentBatchService : IStudentBatchService
     private async Task EnsureStudentExistsWithRole(Guid studentId)
     {
         var user = await _userManager.FindByIdAsync(studentId.ToString());
-        if(user is null)
+        if (user is null)
         {
             _logger.LogWarn($"Student with id: {studentId} not found.");
             throw new UserNotFoundException(studentId);
         }
 
         var requiredRole = RolesEnum.Student.ToString();
-        if(!await _userManager.IsInRoleAsync(user, requiredRole))
+        if (!await _userManager.IsInRoleAsync(user, requiredRole))
         {
             _logger.LogWarn($"User with id: {studentId} is not a Student.");
             throw new UserNotInRoleException(studentId);
@@ -136,7 +178,7 @@ internal sealed class StudentBatchService : IStudentBatchService
 
     private async Task EnsureStudentNotEnrolledInBatch(Guid studentId, Guid batchId, bool trackChanges)
     {
-        if(await _repository.StudentBatch.ExistsAsync(studentId, batchId, trackChanges))
+        if (await _repository.StudentBatch.ExistsAsync(studentId, batchId, trackChanges))
         {
             _logger.LogWarn($"Student with id: {studentId} is enrolled in batch {batchId}.");
             throw new StudentIsEnrolledException(studentId);

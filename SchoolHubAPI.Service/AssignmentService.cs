@@ -27,8 +27,6 @@ internal sealed class AssignmentService : IAssignmentService
 
     public async Task<AssignmentDto?> CreateAsync(Guid batchId, Guid teacherId, AssignmentForCreationDto creationDto, bool batchTrachChanges, bool assignmentTrackChanges)
     {
-        _logger.LogDebug($"Creating assignment in batch {batchId} by teacher {teacherId}");
-
         await EnsureBatchExistsAsync(batchId, batchTrachChanges);
         await EnsureTeacherExistsWithRole(teacherId);
 
@@ -39,24 +37,48 @@ internal sealed class AssignmentService : IAssignmentService
         _repository.Assignment.CreateAssignment(assignmentEntity);
         await _repository.SaveChangesAsync();
 
-        var assignmentDto = _mapper.Map<AssignmentDto>(assignmentEntity);
+        // Notify all students in the batch
+        var studentsInBatch = await _repository.StudentBatch.GetStudentIdsForBatchAsync(batchId, false);
+        foreach (var studentId in studentsInBatch)
+        {
+            var notification = new Notification
+            {
+                Title = "New Assignment",
+                Message = $"Teacher '{teacherId}' created a new assignment '{assignmentEntity.Title}' in your batch.",
+                RecipientRole = RecipientRole.Student,
+                RecipientId = studentId,
+                CreatedDate = DateTime.UtcNow
+            };
+            _repository.Notification.AddNotification(notification);
+        }
+        await _repository.SaveChangesAsync();
 
-        _logger.LogInfo($"Assignment {assignmentEntity.Id} created in batch {batchId} by teacher {teacherId}");
-
-        return assignmentDto;
+        return _mapper.Map<AssignmentDto>(assignmentEntity);
     }
 
     public async Task DeleteAsync(Guid batchId, Guid id, bool batchTrachChanges, bool assignmentTrackChanges)
     {
-        _logger.LogDebug($"Deleting assignment {id} from batch {batchId}");
-
         await EnsureBatchExistsAsync(batchId, batchTrachChanges);
 
         var assignmentEntity = await GetAssignmentForBatch(batchId, id, assignmentTrackChanges);
         _repository.Assignment.DeleteAssignment(assignmentEntity);
         await _repository.SaveChangesAsync();
 
-        _logger.LogInfo($"Assignment {id} deleted from batch {batchId}");
+        // Notify all students in the batch
+        var studentsInBatch = await _repository.StudentBatch.GetStudentIdsForBatchAsync(batchId, false);
+        foreach (var studentId in studentsInBatch)
+        {
+            var notification = new Notification
+            {
+                Title = "Assignment Deleted",
+                Message = $"Assignment '{assignmentEntity.Title}' was deleted by the teacher.",
+                RecipientRole = RecipientRole.Student,
+                RecipientId = studentId,
+                CreatedDate = DateTime.UtcNow
+            };
+            _repository.Notification.AddNotification(notification);
+        }
+        await _repository.SaveChangesAsync();
     }
 
     public async Task<(IEnumerable<AssignmentDto> AssignmentDtos, MetaData MetaData)> GetAllForBatchAsync(Guid batchId, RequestParameters requestParameters, bool batchTrackChanges, bool assignmentTrackChanges)
@@ -106,17 +128,28 @@ internal sealed class AssignmentService : IAssignmentService
 
     public async Task UpdateAsync(Guid batchId, Guid teacherId, Guid id, AssignmentForUpdateDto updateDto, bool batchTrachChanges, bool assignmentTrackChanges)
     {
-        _logger.LogDebug($"Updating assignment {id} in batch {batchId} by teacher {teacherId}");
-
         await EnsureBatchExistsAsync(batchId, batchTrachChanges);
         await EnsureTeacherExistsWithRole(teacherId);
 
         var assignmentEntity = await GetAssignmentForBatch(batchId, id, assignmentTrackChanges);
         _mapper.Map(updateDto, assignmentEntity);
-
         await _repository.SaveChangesAsync();
 
-        _logger.LogInfo($"Assignment {id} updated in batch {batchId} by teacher {teacherId}");
+        // Notify all students in the batch
+        var studentsInBatch = await _repository.StudentBatch.GetStudentIdsForBatchAsync(batchId, batchTrachChanges);
+        foreach (var studentId in studentsInBatch)
+        {
+            var notification = new Notification
+            {
+                Title = "Assignment Updated",
+                Message = $"Assignment '{assignmentEntity.Title}' was updated by the teacher.",
+                RecipientRole = RecipientRole.Student,
+                RecipientId = studentId,
+                CreatedDate = DateTime.UtcNow
+            };
+            _repository.Notification.AddNotification(notification);
+        }
+        await _repository.SaveChangesAsync();
     }
 
     // Private Functions
