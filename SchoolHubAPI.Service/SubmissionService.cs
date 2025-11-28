@@ -195,6 +195,13 @@ internal sealed class SubmissionService : ISubmissionService
         }
     }
 
+    public async Task<bool> CheckForSubmissionAsync(Guid assignmentId, Guid studentId, bool assignmentTrackChanges, bool subTrackChanges)
+    {
+        await EnsureAssignmentExistsAsync(assignmentId, assignmentTrackChanges);
+
+        return await _repository.Submission.CheckForSubmissionAsync(assignmentId, studentId, subTrackChanges);
+    }
+
     // Private Functions
     private async Task EnsureAssignmentExistsAsync(Guid assignmentId, bool trackChanges)
     {

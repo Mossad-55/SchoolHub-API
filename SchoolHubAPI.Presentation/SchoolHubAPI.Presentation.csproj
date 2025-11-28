@@ -16,6 +16,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\SchoolHubAPI.Contracts\SchoolHubAPI.Contracts.csproj" />
 		<ProjectReference Include="..\SchoolHubAPI.Service.Contracts\SchoolHubAPI.Service.Contracts.csproj" />
 	</ItemGroup>
 

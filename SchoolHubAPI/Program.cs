@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using NLog;
 using SchoolHubAPI.Contracts;
 using SchoolHubAPI.Extensions;
+using SchoolHubAPI.FilesHandling;
 using SchoolHubAPI.Presentation.ActionFilters;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -23,6 +24,7 @@ builder.Services.ConfigureValidators();
 builder.Services.ConfigureSwagger();
 
 builder.Services.AddScoped<ValidationFilterAttribute>();
+builder.Services.AddScoped<IFileService, FileService>();
 builder.Services.AddControllers(config =>
 {
     config.RespectBrowserAcceptHeader = true; // Accept header support
