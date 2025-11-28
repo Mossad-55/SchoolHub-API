@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using SchoolHubAPI.Presentation.ActionFilters;
 using SchoolHubAPI.Service.Contracts;
 using SchoolHubAPI.Shared.DTOs.Course;
@@ -13,24 +14,43 @@ namespace SchoolHubAPI.Presentation.Controllers;
 public class CoursesController : ControllerBase
 {
     private readonly IServiceManager _service;
+    private readonly IMemoryCache _memoryCache;
 
-    public CoursesController(IServiceManager service) => _service = service;
+    public CoursesController(IServiceManager service, IMemoryCache memoryCache)
+    {
+        _service = service;
+        _memoryCache = memoryCache;
+    }
+
+    private string GetCacheKey(Guid departmentId) => $"Courses_{departmentId}";
 
     [HttpGet]
     public async Task<IActionResult> GetCourses(Guid departmentId, [FromQuery] RequestParameters requestParameters)
     {
-        var result = await _service.CourseService.GetAllAsync(departmentId, requestParameters,depTrackChanges: false, courseTrackChanges: false);
+        var cacheKey = GetCacheKey(departmentId);
 
-        Response.Headers.TryAdd("X-Pagination", JsonSerializer.Serialize(result.MetaData));
+        if (!_memoryCache.TryGetValue(cacheKey, out (IEnumerable<CourseDto> Courses, MetaData MetaData) cachedCourses))
+        {
+            cachedCourses = await _service.CourseService.GetAllAsync(departmentId, requestParameters, depTrackChanges: false, courseTrackChanges: false);
 
-        return Ok(result.CourseDtos);
+            var cacheOptions = new MemoryCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5),
+                SlidingExpiration = TimeSpan.FromMinutes(2)
+            };
+
+            _memoryCache.Set(cacheKey, cachedCourses, cacheOptions);
+        }
+
+        Response.Headers.TryAdd("X-Pagination", JsonSerializer.Serialize(cachedCourses.MetaData));
+
+        return Ok(cachedCourses.Courses);
     }
 
     [HttpGet("{id:guid}", Name = "CourseById")]
     public async Task<IActionResult> GetCourse(Guid departmentId, Guid id)
     {
         var courseDto = await _service.CourseService.GetByIdForDepartmentAsync(departmentId, id, depTrackChanges: false, courseTrackChanges: false);
-
         return Ok(courseDto);
     }
 
@@ -39,6 +59,9 @@ public class CoursesController : ControllerBase
     public async Task<IActionResult> CreateCourse(Guid departmentId, [FromBody] CourseForCreationDto creationDto)
     {
         var courseDto = await _service.CourseService.CreateAsync(departmentId, creationDto, depTrackChanges: false, courseTrackChanges: false);
+
+        // Invalidate cache for this department
+        _memoryCache.Remove(GetCacheKey(departmentId));
 
         return CreatedAtRoute("CourseById", new { departmentId, id = courseDto!.Id }, courseDto);
     }
@@ -49,6 +72,9 @@ public class CoursesController : ControllerBase
     {
         await _service.CourseService.UpdateAsync(departmentId, id, updateDto, depTrackChanges: false, courseTrackChanges: true);
 
+        // Invalidate cache for this department
+        _memoryCache.Remove(GetCacheKey(departmentId));
+
         return NoContent();
     }
 
@@ -56,6 +82,9 @@ public class CoursesController : ControllerBase
     public async Task<IActionResult> DeleteCourse(Guid departmentId, Guid id)
     {
         await _service.CourseService.DeleteAsync(departmentId, id, depTrackChanges: false, courseTrackChanges: false);
+
+        // Invalidate cache for this department
+        _memoryCache.Remove(GetCacheKey(departmentId));
 
         return NoContent();
     }
