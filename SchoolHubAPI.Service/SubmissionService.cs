@@ -27,88 +27,110 @@ internal sealed class SubmissionService : ISubmissionService
 
     public async Task DeleteAsync(Guid assignmentId, Guid studentId, Guid id, bool assignmentTrackChanges, bool subTrackChanges)
     {
-        await EnsureAssignmentExistsAsync(assignmentId, assignmentTrackChanges);
+        _logger.LogDebug($"Deleting submission {id} for assignment {assignmentId} by student {studentId}");
 
+        await EnsureAssignmentExistsAsync(assignmentId, assignmentTrackChanges);
         await EnsureStudentExistsWithRole(studentId);
 
         var submissionEntity = await GetSubmissionForAssignment(assignmentId, id, subTrackChanges);
         if (submissionEntity.StudentId != studentId)
+        {
+            _logger.LogWarn($"Submission {id} is not owned by student {studentId}");
             throw new SubmissionNotOwnedByStudentException(studentId);
+        }
 
         _repository.Submission.DeleteSubmission(submissionEntity);
-
         await _repository.SaveChangesAsync();
+
+        _logger.LogInfo($"Submission {id} deleted successfully for assignment {assignmentId}");
     }
 
     public async Task<(IEnumerable<SubmissionDto> SubmissionDtos, MetaData MetaData)> GetAllForAssignmentAsync(Guid assignmentId, RequestParameters requestParameters, bool assignmentTrackChanges, bool subTrackChanges)
     {
+        _logger.LogDebug($"Fetching all submissions for assignment {assignmentId}");
+
         await EnsureAssignmentExistsAsync(assignmentId, assignmentTrackChanges);
 
         var submissionWithMetaData = await _repository.Submission.GetAllForAssignmentAsync(assignmentId, requestParameters, subTrackChanges);
-
         var submissionDtos = _mapper.Map<IEnumerable<SubmissionDto>>(submissionWithMetaData);
+
+        _logger.LogInfo($"Fetched {submissionDtos.Count()} submissions for assignment {assignmentId}");
 
         return (submissionDtos, submissionWithMetaData.MetaData);
     }
 
     public async Task<SubmissionDto?> GetByIdAsync(Guid assignmentId, Guid id, bool assignmentTrackChanges, bool subTrackChanges)
     {
+        _logger.LogDebug($"Fetching submission {id} for assignment {assignmentId}");
+
         await EnsureAssignmentExistsAsync(assignmentId, assignmentTrackChanges);
 
         var submissionEntity = await GetSubmissionForAssignment(assignmentId, id, subTrackChanges);
-
         var submissionDto = _mapper.Map<SubmissionDto>(submissionEntity);
+
+        _logger.LogInfo($"Submission {id} retrieved successfully for assignment {assignmentId}");
 
         return submissionDto;
     }
 
+    public async Task<SubmissionDto?> SubmitAsync(Guid assignmentId, Guid studentId, SubmissionForCreationDto creationDto, bool assignmentTrackChanges, bool subTrackChanges)
+    {
+        _logger.LogDebug($"Student {studentId} submitting assignment {assignmentId}");
+
+        await EnsureAssignmentExistsAsync(assignmentId, assignmentTrackChanges);
+        await EnsureStudentExistsWithRole(studentId);
+
+        if (await _repository.Submission.CheckForSubmissionAsync(assignmentId, studentId, subTrackChanges))
+        {
+            _logger.LogWarn($"Student {studentId} has already submitted assignment {assignmentId}");
+            throw new StudentSubmittedAssignmentException(assignmentId, studentId);
+        }
+
+        var submissionEntity = _mapper.Map<Submission>(creationDto);
+        submissionEntity.StudentId = studentId;
+
+        _repository.Submission.CreateSubmission(submissionEntity);
+        await _repository.SaveChangesAsync();
+
+        _logger.LogInfo($"Student {studentId} submitted assignment {assignmentId} successfully");
+
+        return _mapper.Map<SubmissionDto>(submissionEntity);
+    }
+
     public async Task GradeAsync(Guid assignmentId, Guid teacherId, Guid id, GradeSubmissionForUpdateDto gradeDto, bool assignmentTrackChanges, bool subTrackChanges)
     {
-        await EnsureAssignmentExistsAsync(assignmentId, assignmentTrackChanges);
+        _logger.LogDebug($"Teacher {teacherId} grading submission {id} for assignment {assignmentId}");
 
+        await EnsureAssignmentExistsAsync(assignmentId, assignmentTrackChanges);
         await EnsureTeacherExistsWithRole(teacherId);
 
         var submissionEntity = await GetSubmissionForAssignment(assignmentId, id, subTrackChanges);
         submissionEntity.GradedByTeacherId = teacherId;
 
         _mapper.Map(gradeDto, submissionEntity);
-
-        await _repository.SaveChangesAsync();
-    }
-
-    public async Task<SubmissionDto?> SubmitAsync(Guid assignmentId, Guid studentId, SubmissionForCreationDto creationDto, bool assignmentTrackChanges, bool subTrackChanges)
-    {
-        await EnsureAssignmentExistsAsync(assignmentId, assignmentTrackChanges);
-
-        await EnsureStudentExistsWithRole(studentId);
-
-        if (await _repository.Submission.CheckForSubmissionAsync(assignmentId, studentId, subTrackChanges))
-            throw new StudentSubmittedAssignmentException(assignmentId, studentId);
-
-        var submissionEntity = _mapper.Map<Submission>(creationDto);
-        submissionEntity.StudentId = studentId;
-
-        _repository.Submission.CreateSubmission(submissionEntity);
-
         await _repository.SaveChangesAsync();
 
-        return _mapper.Map<SubmissionDto>(submissionEntity);
+        _logger.LogInfo($"Submission {id} graded by teacher {teacherId} for assignment {assignmentId}");
     }
-
 
     public async Task UpdateAsync(Guid assignmentId, Guid studentId, Guid id, SubmissionForUpdateDto updateDto, bool assignmentTrackChanges, bool subTrackChanges)
     {
-        await EnsureAssignmentExistsAsync(assignmentId, assignmentTrackChanges);
+        _logger.LogDebug($"Updating submission {id} for assignment {assignmentId} by student {studentId}");
 
+        await EnsureAssignmentExistsAsync(assignmentId, assignmentTrackChanges);
         await EnsureStudentExistsWithRole(studentId);
 
         var submissionEntity = await GetSubmissionForAssignment(assignmentId, id, subTrackChanges);
         if (submissionEntity.StudentId != studentId)
+        {
+            _logger.LogWarn($"Submission {id} is not owned by student {studentId}");
             throw new SubmissionNotOwnedByStudentException(studentId);
+        }
 
         _mapper.Map(updateDto, submissionEntity);
-
         await _repository.SaveChangesAsync();
+
+        _logger.LogInfo($"Submission {id} updated successfully for assignment {assignmentId}");
     }
 
     // Private Functions
@@ -117,11 +139,11 @@ internal sealed class SubmissionService : ISubmissionService
         var assignment = await _repository.Assignment.GetByIdAsync(assignmentId, trackChanges);
         if (assignment is null)
         {
-            _logger.LogWarn($"Assignment with id: {assignmentId} not found.");
+            _logger.LogWarn($"Assignment {assignmentId} not found");
             throw new AssignmentNotFoundException(assignmentId);
         }
 
-        _logger.LogDebug($"Assignment with id: {assignmentId} exists.");
+        _logger.LogDebug($"Assignment {assignmentId} exists");
     }
 
     private async Task<Submission> GetSubmissionForAssignment(Guid assignmentId, Guid id, bool trackChanges)
@@ -129,11 +151,11 @@ internal sealed class SubmissionService : ISubmissionService
         var submissionEntity = await _repository.Submission.GetForAssignmenthByIdAsync(assignmentId, id, trackChanges);
         if (submissionEntity is null)
         {
-            _logger.LogWarn($"Submission with id: {id} in Assignment {assignmentId} not found.");
+            _logger.LogWarn($"Submission {id} in assignment {assignmentId} not found");
             throw new SubmissionNotFoundException(id);
         }
 
-        _logger.LogDebug($"Submission with id: {id} retrieved for assignment {assignmentId}.");
+        _logger.LogDebug($"Submission {id} retrieved for assignment {assignmentId}");
         return submissionEntity;
     }
 
@@ -141,19 +163,35 @@ internal sealed class SubmissionService : ISubmissionService
     {
         var teacher = await _userManager.FindByIdAsync(teacherId.ToString());
         if (teacher is null)
+        {
+            _logger.LogWarn($"Teacher {teacherId} not found");
             throw new UserNotFoundException(teacherId);
+        }
 
-        if (await _userManager.IsInRoleAsync(teacher, RolesEnum.Teacher.ToString()))
+        if (!await _userManager.IsInRoleAsync(teacher, RolesEnum.Teacher.ToString()))
+        {
+            _logger.LogWarn($"User {teacherId} is not in role Teacher");
             throw new UserNotInRoleException(teacherId);
+        }
+
+        _logger.LogDebug($"Teacher {teacherId} exists and has Teacher role");
     }
 
     private async Task EnsureStudentExistsWithRole(Guid studentId)
     {
         var student = await _userManager.FindByIdAsync(studentId.ToString());
         if (student is null)
+        {
+            _logger.LogWarn($"Student {studentId} not found");
             throw new UserNotFoundException(studentId);
+        }
 
-        if (await _userManager.IsInRoleAsync(student, RolesEnum.Student.ToString()))
+        if (!await _userManager.IsInRoleAsync(student, RolesEnum.Student.ToString()))
+        {
+            _logger.LogWarn($"User {studentId} is not in role Student");
             throw new UserNotInRoleException(studentId);
+        }
+
+        _logger.LogDebug($"Student {studentId} exists and has Student role");
     }
 }

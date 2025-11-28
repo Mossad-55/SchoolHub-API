@@ -24,80 +24,122 @@ internal sealed class NotificationService : INotificationService
 
     public async Task<NotificationDto> CreateAsync(NotificationForCreationDto dto)
     {
+        _logger.LogDebug("Creating a new notification");
+
         var notificationEntity = _mapper.Map<Notification>(dto);
 
         _repository.Notification.AddNotification(notificationEntity);
-
         await _repository.SaveChangesAsync();
+
+        _logger.LogInfo($"Notification {notificationEntity.Id} created successfully");
 
         return _mapper.Map<NotificationDto>(notificationEntity);
     }
 
     public async Task DeleteAsync(Guid id, bool trackChanges)
     {
+        _logger.LogDebug($"Deleting notification {id}");
+
         var notificationEntity = await _repository.Notification.GetByIdAsync(id, trackChanges);
         if (notificationEntity is null)
+        {
+            _logger.LogWarn($"Notification {id} not found");
             throw new NotificationNotFoundException();
+        }
 
         _repository.Notification.RemoveNotification(notificationEntity);
-
         await _repository.SaveChangesAsync();
+
+        _logger.LogInfo($"Notification {id} deleted successfully");
     }
 
     public async Task<NotificationDto?> GetByIdAsync(Guid id, RecipientRole role, bool trackChanges, Guid? userId = null)
     {
+        _logger.LogDebug($"Fetching notification {id} for role {role}");
+
         var notificationEntity = await _repository.Notification.GetByIdAsync(id, trackChanges);
         if (notificationEntity is null)
+        {
+            _logger.LogWarn($"Notification {id} not found");
             throw new NotificationNotFoundException();
+        }
 
         if (role != RecipientRole.Admin && !(notificationEntity.RecipientRole == role) &&
             (notificationEntity.RecipientId == null || (userId.HasValue && notificationEntity.RecipientId == userId)))
+        {
+            _logger.LogWarn($"Notification {id} not accessible for role {role} / user {userId}");
             throw new NotificationNotFoundException();
+        }
+
+        _logger.LogInfo($"Notification {id} retrieved successfully for role {role}");
 
         return _mapper.Map<NotificationDto>(notificationEntity);
     }
 
-    public async Task<(IEnumerable<NotificationDto> NotificationDtos, MetaData MetaData)> GetForUserAsync(RecipientRole role, RequestParameters requestParameters, bool trackChanges, Guid? userId = null)
+    public async Task<(IEnumerable<NotificationDto> NotificationDtos, MetaData MetaData)> GetForUserAsync(
+        RecipientRole role,
+        RequestParameters requestParameters,
+        bool trackChanges,
+        Guid? userId = null)
     {
-        if(role == RecipientRole.Admin)
+        _logger.LogDebug($"Fetching notifications for role {role} / user {userId}");
+
+        if (role == RecipientRole.Admin)
         {
             var notificationsWithMetaDataForAdmin = await _repository.Notification.GetAllAsync(requestParameters, trackChanges);
+            var notificationDtosForAdmin = _mapper.Map<IEnumerable<NotificationDto>>(notificationsWithMetaDataForAdmin);
 
-            var notificationDtos = _mapper.Map<IEnumerable<NotificationDto>>(notificationsWithMetaDataForAdmin);
+            _logger.LogInfo($"Fetched {notificationDtosForAdmin.Count()} notifications for Admin");
 
-            return (notificationDtos, notificationsWithMetaDataForAdmin.MetaData);
+            return (notificationDtosForAdmin, notificationsWithMetaDataForAdmin.MetaData);
         }
 
         var notificationsWithMetaData = await _repository.Notification.GetForRecipientAsync(role, requestParameters, trackChanges, userId);
+        var notificationDtos = _mapper.Map<IEnumerable<NotificationDto>>(notificationsWithMetaData);
 
-        var notifcationsDtos = _mapper.Map<IEnumerable<NotificationDto>>(notificationsWithMetaData);
+        _logger.LogInfo($"Fetched {notificationDtos.Count()} notifications for role {role} / user {userId}");
 
-        return (notifcationsDtos, notificationsWithMetaData.MetaData);
+        return (notificationDtos, notificationsWithMetaData.MetaData);
     }
 
     public async Task MarkAsReadAsync(Guid id, RecipientRole role, bool trackChanges, Guid? userId = null)
     {
+        _logger.LogDebug($"Marking notification {id} as read for role {role} / user {userId}");
+
         var notificationEntity = await _repository.Notification.GetByIdAsync(id, trackChanges);
         if (notificationEntity is null)
+        {
+            _logger.LogWarn($"Notification {id} not found");
             throw new NotificationNotFoundException();
+        }
 
         if (role != RecipientRole.Admin && !(notificationEntity.RecipientRole == role) &&
             (notificationEntity.RecipientId == null || (userId.HasValue && notificationEntity.RecipientId == userId)))
+        {
+            _logger.LogWarn($"Notification {id} cannot be marked as read by role {role} / user {userId}");
             throw new NotificationNotFoundException();
+        }
 
         notificationEntity.IsRead = true;
-
         await _repository.SaveChangesAsync();
+
+        _logger.LogInfo($"Notification {id} marked as read by role {role} / user {userId}");
     }
 
     public async Task UpdateAsync(Guid id, NotificationForUpdateDto dto, bool trackChanges)
     {
+        _logger.LogDebug($"Updating notification {id}");
+
         var notificationEntity = await _repository.Notification.GetByIdAsync(id, trackChanges);
         if (notificationEntity is null)
+        {
+            _logger.LogWarn($"Notification {id} not found");
             throw new NotificationNotFoundException();
+        }
 
         _mapper.Map(dto, notificationEntity);
-
         await _repository.SaveChangesAsync();
+
+        _logger.LogInfo($"Notification {id} updated successfully");
     }
 }
