@@ -12,6 +12,7 @@ namespace SchoolHubAPI.Presentation.Controllers;
 [Route("api/batches/{batchId}/attendances")]
 [ApiController]
 [ApiExplorerSettings(GroupName = "v1")]
+[Authorize(Roles = "Teacher")]
 public class AttendancesController : ControllerBase
 {
     private readonly IServiceManager _service;
@@ -29,6 +30,7 @@ public class AttendancesController : ControllerBase
     }
 
     [HttpGet("{id:guid}", Name = "GetAttendanceById")]
+    [Authorize(Roles = "Teacher, Student")]
     public async Task<IActionResult> GetAttendanceById(Guid batchId, Guid id)
     {
         var attendanceDto = await _service.AttendanceService.GetAttendanceForBatchAsync(batchId, id, batchTrackChanges: false, attTrackChanges: false);
@@ -54,7 +56,6 @@ public class AttendancesController : ControllerBase
 
     [HttpPut("{id:guid}")]
     [ServiceFilter(typeof(ValidationFilterAttribute))]
-    [Authorize(Roles = "Teacher")]
     public async Task<IActionResult> UpdateAttendance(Guid batchId, Guid id, [FromBody] AttendanceForUpdateDto updateDto)
     {
         var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -69,7 +70,6 @@ public class AttendancesController : ControllerBase
     }
 
     [HttpDelete("{id:guid}")]
-    [Authorize(Roles = "Teacher")]
     public async Task<IActionResult> DeleteAttendance(Guid batchId, Guid id)
     {
         var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;

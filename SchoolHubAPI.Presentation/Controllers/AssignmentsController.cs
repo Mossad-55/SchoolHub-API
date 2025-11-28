@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SchoolHubAPI.Presentation.ActionFilters;
 using SchoolHubAPI.Service.Contracts;
 using SchoolHubAPI.Shared.DTOs.Assignment;
@@ -11,6 +12,7 @@ namespace SchoolHubAPI.Presentation.Controllers;
 [Route("api/batchs/{batchId}/assignments")]
 [ApiController]
 [ApiExplorerSettings(GroupName = "v1")]
+[Authorize(Roles = "Teacher")]
 public class AssignmentsController : ControllerBase
 {
     private readonly IServiceManager _service;
@@ -18,6 +20,7 @@ public class AssignmentsController : ControllerBase
     public AssignmentsController(IServiceManager service) => _service = service;
 
     [HttpGet]
+    [Authorize(Roles = "Teacher, Student")]
     public async Task<IActionResult> GetAllForBatch(Guid batchId, [FromQuery] RequestParameters requestParameters)
     {
         var result = await _service.AssignmentService.GetAllForBatchAsync(batchId, requestParameters, batchTrackChanges: false, assignmentTrackChanges: false);
@@ -28,6 +31,7 @@ public class AssignmentsController : ControllerBase
     }
 
     [HttpGet("{id:guid}", Name = "GetAssignmentById")]
+    [Authorize(Roles = "Teacher, Student")]
     public async Task<IActionResult> GetByIdForBatch(Guid batchId, Guid id)
     {
         var assignmentDto = await _service.AssignmentService.GetForBatchByIdAsync(batchId, id, batchTrachChanges: false, assignmentTrackChanges: false);

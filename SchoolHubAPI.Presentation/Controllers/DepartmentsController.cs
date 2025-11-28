@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using SchoolHubAPI.Presentation.ActionFilters;
 using SchoolHubAPI.Service.Contracts;
@@ -11,6 +12,7 @@ namespace SchoolHubAPI.Presentation.Controllers;
 [Route("api/departments")]
 [ApiController]
 [ApiExplorerSettings(GroupName = "v1")]
+[Authorize(Roles = "Admin")]
 public class DepartmentsController : ControllerBase
 {
     private readonly IServiceManager _service;
@@ -24,6 +26,7 @@ public class DepartmentsController : ControllerBase
     }
 
     [HttpGet]
+    [Authorize(Roles = "Admin, Teacher, Student")]
     public async Task<IActionResult> GetDepartments([FromQuery] RequestParameters requestParameters)
     {
         // Try get from cache first
@@ -47,6 +50,7 @@ public class DepartmentsController : ControllerBase
     }
 
     [HttpGet("{id:guid}", Name = "DepartmentById")]
+    [Authorize(Roles = "Admin, Teacher, Student")]
     public async Task<IActionResult> GetDepartment(Guid id)
     {
         var departmentDto = await _service.DepartmentService.GetByIdAsync(id, false);

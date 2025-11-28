@@ -43,7 +43,7 @@ public class SubmissionsController : ControllerBase
 
     [HttpPost]
     [ServiceFilter(typeof(ValidationFilterAttribute))]
-    public async Task<IActionResult> CreateSubmission(Guid assignmentId, [FromBody] SubmissionForCreationDto creationDto)
+    public async Task<IActionResult> CreateSubmission(Guid assignmentId, [FromForm] SubmissionForCreationDto creationDto)
     {
         var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (!Guid.TryParse(userIdString, out Guid userId))
@@ -72,7 +72,7 @@ public class SubmissionsController : ControllerBase
 
     [HttpPut("{id:guid}")]
     [ServiceFilter(typeof(ValidationFilterAttribute))]
-    public async Task<IActionResult> UpdateSubmission(Guid assignmentId, Guid id, [FromBody] SubmissionForUpdateDto updateDto)
+    public async Task<IActionResult> UpdateSubmission(Guid assignmentId, Guid id, [FromForm] SubmissionForUpdateDto updateDto)
     {
         var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if(!Guid.TryParse(userIdString, out Guid userId))

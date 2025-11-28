@@ -10,6 +10,7 @@ namespace SchoolHubAPI.Presentation.Controllers;
 [Route("api/students")]
 [ApiController]
 [ApiExplorerSettings(GroupName = "v1")]
+[Authorize(Roles = "Admin, Teacher")]
 public class StudentsController : ControllerBase
 {
     private readonly IServiceManager _service;
@@ -27,6 +28,7 @@ public class StudentsController : ControllerBase
     }
 
     [HttpGet("{id:guid}")]
+    [Authorize(Roles = "Admin, Teacher, Student")]
     public async Task<IActionResult> GetStudent(Guid id)
     {
         var studentDto = await _service.StudentService.GetByIdAsync(id, trackChanges: false);

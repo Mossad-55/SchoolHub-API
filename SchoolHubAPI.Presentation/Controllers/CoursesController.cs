@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using SchoolHubAPI.Presentation.ActionFilters;
 using SchoolHubAPI.Service.Contracts;
@@ -11,6 +12,7 @@ namespace SchoolHubAPI.Presentation.Controllers;
 [Route("api/departments/{departmentId}/courses")]
 [ApiController]
 [ApiExplorerSettings(GroupName = "v1")]
+[Authorize(Roles = "Admin")]
 public class CoursesController : ControllerBase
 {
     private readonly IServiceManager _service;
@@ -25,6 +27,7 @@ public class CoursesController : ControllerBase
     private string GetCacheKey(Guid departmentId) => $"Courses_{departmentId}";
 
     [HttpGet]
+    [Authorize(Roles = "Admin, Teacher, Student")]
     public async Task<IActionResult> GetCourses(Guid departmentId, [FromQuery] RequestParameters requestParameters)
     {
         var cacheKey = GetCacheKey(departmentId);
@@ -48,6 +51,7 @@ public class CoursesController : ControllerBase
     }
 
     [HttpGet("{id:guid}", Name = "CourseById")]
+    [Authorize(Roles = "Admin, Teacher, Student")]
     public async Task<IActionResult> GetCourse(Guid departmentId, Guid id)
     {
         var courseDto = await _service.CourseService.GetByIdForDepartmentAsync(departmentId, id, depTrackChanges: false, courseTrackChanges: false);

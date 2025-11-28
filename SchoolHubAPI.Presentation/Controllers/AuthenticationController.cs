@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SchoolHubAPI.Presentation.ActionFilters;
 using SchoolHubAPI.Service.Contracts;
 using SchoolHubAPI.Shared.DTOs.User;
@@ -41,6 +42,7 @@ public class AuthenticationController : ControllerBase
 
     [HttpPut("update")]
     [ServiceFilter(typeof(ValidationFilterAttribute))]
+    [Authorize]
     public async Task<IActionResult> UpdateUser([FromBody] UserUpdateDto updateDto)
     {
         var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -57,6 +59,7 @@ public class AuthenticationController : ControllerBase
     }
 
     [HttpDelete("delete/{id:guid}")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> DeleteUser(Guid id)
     {
         await _authService.AuthenticationService.DeleteUserAsync(id);
@@ -66,6 +69,7 @@ public class AuthenticationController : ControllerBase
 
     [HttpPost("refresh-token")]
     [ServiceFilter(typeof(ValidationFilterAttribute))]
+    [Authorize]
     public async Task<IActionResult> RefreshToken([FromBody] TokenDto tokenDto)
     {
         var authHeader = Request.Headers["Authorization"].ToString();

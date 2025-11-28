@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SchoolHubAPI.Service.Contracts;
 using SchoolHubAPI.Shared.RequestFeatures;
 using System.Text.Json;
@@ -8,6 +9,7 @@ namespace SchoolHubAPI.Presentation.Controllers;
 [Route("api/batches/{batchId}/students")]
 [ApiController]
 [ApiExplorerSettings(GroupName = "v1")]
+[Authorize(Roles = "Teacher")]
 public class StudentBatchesController : ControllerBase
 {
     private readonly IServiceManager _service;

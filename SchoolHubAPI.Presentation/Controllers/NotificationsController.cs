@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SchoolHubAPI.Service.Contracts;
 using SchoolHubAPI.Shared;
 using SchoolHubAPI.Shared.DTOs.Notification;
@@ -11,6 +12,7 @@ namespace SchoolHubAPI.Presentation.Controllers;
 [Route("api/notifications")]
 [ApiController]
 [ApiExplorerSettings(GroupName = "v1")]
+[Authorize(Roles = "Admin, Teacher, Student")]
 public class NotificationsController : ControllerBase
 {
     private readonly IServiceManager _service;
@@ -60,6 +62,7 @@ public class NotificationsController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Roles = "Admin, Teacher")]
     public async Task<IActionResult> Create([FromBody] NotificationForCreationDto creationDto)
     {
         var notificationDto = await _service.NotificationService.CreateAsync(creationDto);
@@ -68,6 +71,7 @@ public class NotificationsController : ControllerBase
     }
 
     [HttpPut("{id:guid}")]
+    [Authorize(Roles = "Admin, Teacher")]
     public async Task<IActionResult> Update(Guid id, [FromBody] NotificationForUpdateDto updateDto)
     {
         await _service.NotificationService.UpdateAsync(id, updateDto, trackChanges: true);
@@ -87,6 +91,7 @@ public class NotificationsController : ControllerBase
     }
 
     [HttpDelete("{id:guid}")]
+    [Authorize(Roles = "Admin, Teacher")]
     public async Task<IActionResult> Delete(Guid id)
     {
         await _service.NotificationService.DeleteAsync(id, trackChanges: false);

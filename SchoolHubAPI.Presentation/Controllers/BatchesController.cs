@@ -12,6 +12,7 @@ namespace SchoolHubAPI.Presentation.Controllers;
 [Route("api/courses/{courseId}/batches")]
 [ApiController]
 [ApiExplorerSettings(GroupName = "v1")]
+[Authorize(Roles = "Teacher")]
 public class BatchesController : ControllerBase
 {
     private readonly IServiceManager _service;
@@ -19,6 +20,7 @@ public class BatchesController : ControllerBase
     public BatchesController(IServiceManager service) => _service = service;
 
     [HttpGet]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> GetBatches(Guid courseId, [FromQuery] RequestParameters requestParameters)
     {
         var result = await _service.BatchService.GetAllAsync(courseId, requestParameters, courseTrackChanges: false, batchTrackChanges: false);
@@ -29,6 +31,7 @@ public class BatchesController : ControllerBase
     }
 
     [HttpGet("{id:guid}", Name = "BatchById")]
+    [Authorize(Roles = "Admin, Teacher, Student")]
     public async Task<IActionResult> GetBatch(Guid courseId, Guid id)
     {
         var batchDto = await _service.BatchService.GetByIdForCourseAsync(courseId, id, courseTrackChanges: false, batchTrackChanges: false);
@@ -38,7 +41,6 @@ public class BatchesController : ControllerBase
 
     [HttpPost]
     [ServiceFilter(typeof(ValidationFilterAttribute))]
-    [Authorize(Roles = "Teacher")]
     public async Task<IActionResult> CreateBatch(Guid courseId, [FromBody] BatchForCreationDto creationDto)
     {
         var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;

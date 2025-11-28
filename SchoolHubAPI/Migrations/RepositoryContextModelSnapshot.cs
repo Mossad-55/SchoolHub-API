@@ -180,7 +180,7 @@ namespace SchoolHubAPI.Migrations
 
                     b.HasKey("UserId");
 
-                    b.ToTable("Admins");
+                    b.ToTable("Admins", (string)null);
                 });
 
             modelBuilder.Entity("SchoolHubAPI.Entities.Entities.Assignment", b =>
@@ -213,7 +213,7 @@ namespace SchoolHubAPI.Migrations
 
                     b.HasIndex("CreatedByTeacherId");
 
-                    b.ToTable("Assignments");
+                    b.ToTable("Assignments", (string)null);
                 });
 
             modelBuilder.Entity("SchoolHubAPI.Entities.Entities.Attendance", b =>
@@ -248,7 +248,7 @@ namespace SchoolHubAPI.Migrations
 
                     b.HasIndex("StudentId");
 
-                    b.ToTable("Attendances");
+                    b.ToTable("Attendances", (string)null);
                 });
 
             modelBuilder.Entity("SchoolHubAPI.Entities.Entities.Batch", b =>
@@ -290,7 +290,7 @@ namespace SchoolHubAPI.Migrations
 
                     b.HasIndex("TeacherId");
 
-                    b.ToTable("Batches");
+                    b.ToTable("Batches", (string)null);
                 });
 
             modelBuilder.Entity("SchoolHubAPI.Entities.Entities.Course", b =>
@@ -326,7 +326,7 @@ namespace SchoolHubAPI.Migrations
                         .IsUnique()
                         .HasFilter("[Code] IS NOT NULL");
 
-                    b.ToTable("Courses");
+                    b.ToTable("Courses", (string)null);
                 });
 
             modelBuilder.Entity("SchoolHubAPI.Entities.Entities.Department", b =>
@@ -354,7 +354,7 @@ namespace SchoolHubAPI.Migrations
 
                     b.HasIndex("HeadOfDepartmentId");
 
-                    b.ToTable("Departments");
+                    b.ToTable("Departments", (string)null);
                 });
 
             modelBuilder.Entity("SchoolHubAPI.Entities.Entities.Notification", b =>
@@ -383,7 +383,7 @@ namespace SchoolHubAPI.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Notifications");
+                    b.ToTable("Notifications", (string)null);
                 });
 
             modelBuilder.Entity("SchoolHubAPI.Entities.Entities.Student", b =>
@@ -393,7 +393,7 @@ namespace SchoolHubAPI.Migrations
 
                     b.HasKey("UserId");
 
-                    b.ToTable("Students");
+                    b.ToTable("Students", (string)null);
                 });
 
             modelBuilder.Entity("SchoolHubAPI.Entities.Entities.StudentBatch", b =>
@@ -417,7 +417,7 @@ namespace SchoolHubAPI.Migrations
 
                     b.HasIndex("StudentId");
 
-                    b.ToTable("StudentBatches");
+                    b.ToTable("StudentBatches", (string)null);
                 });
 
             modelBuilder.Entity("SchoolHubAPI.Entities.Entities.Submission", b =>
@@ -455,7 +455,7 @@ namespace SchoolHubAPI.Migrations
 
                     b.HasIndex("StudentId");
 
-                    b.ToTable("Submissions");
+                    b.ToTable("Submissions", (string)null);
                 });
 
             modelBuilder.Entity("SchoolHubAPI.Entities.Entities.Teacher", b =>
@@ -465,7 +465,7 @@ namespace SchoolHubAPI.Migrations
 
                     b.HasKey("UserId");
 
-                    b.ToTable("Teachers");
+                    b.ToTable("Teachers", (string)null);
                 });
 
             modelBuilder.Entity("SchoolHubAPI.Entities.Entities.User", b =>
