@@ -226,7 +226,7 @@ Response:
 
 ### 5. Soft Delete a Course (Admin only)
 
-**PATCH** `/api/departments/{departmentId}/courses/{courseId}/deactivate`
+**PUT** `/api/departments/{departmentId}/courses/{courseId}`
 
 Headers:
 
@@ -247,7 +247,7 @@ Response:
 
 ### 6. Activate Course
 
-**PATCH** `/api/departments/{departmentId}/courses/{courseId}/activate`
+**PUT** `/api/departments/{departmentId}/courses/{courseId}`
 
 ---
 
@@ -262,7 +262,7 @@ Response:
 
 ## 📄 API Documentation
 
-- Swagger UI available at `https://localhost:5001/swagger`
+- Swagger UI available at `https://localhost:44353/swagger`
 - All endpoints documented and testable
 - Use JWT token to access secured endpoints
 
