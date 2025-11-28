@@ -12,4 +12,5 @@ public interface IServiceManager
     IAttendanceService AttendanceService { get; }
     IAssignmentService AssignmentService { get; }
     ISubmissionService SubmissionService { get; }
+    INotificationService NotificationService { get; }
 }
