@@ -104,10 +104,10 @@ public class MappingProfile : Profile
         // StudentBatch Mapping
         CreateMap<StudentBatch, StudentBatchDto>()
             .ForMember(sb => sb.BatchName,
-                opts => opts.MapFrom(src => 
+                opts => opts.MapFrom(src =>
                     src.Batch != null ? src.Batch.Name : string.Empty))
             .ForMember(sb => sb.StudentName,
-                opts => opts.MapFrom(src => 
+                opts => opts.MapFrom(src =>
                     src.Student != null && src.Student.User != null
                     ? src.Student.User.Name : string.Empty))
             .ForMember(sb => sb.EnrollmentDate,
@@ -117,6 +117,9 @@ public class MappingProfile : Profile
             .ForMember(sb => sb.BatchName,
                 opts => opts.MapFrom(src =>
                     src.Batch != null ? src.Batch.Name : string.Empty))
+            .ForMember(sb => sb.BatchId,
+                opts => opts.MapFrom(src =>
+                    src.Batch != null ? src.Batch.Id : (Guid?)null))
             .ForMember(sb => sb.CourseName,
                 opts => opts.MapFrom(src =>
                     src.Batch != null && src.Batch.Course != null ?
@@ -180,8 +183,12 @@ public class MappingProfile : Profile
             .ForMember(s => s.AssignmentTitle,
                 opts => opts.MapFrom(src =>
                     src.Assignment != null ? src.Assignment.Title : string.Empty));
-        CreateMap<SubmissionForCreationDto, Submission>();
-        CreateMap<SubmissionForUpdateDto, Submission>();
+        CreateMap<SubmissionForCreationDto, Submission>()
+            .ForMember(s => s.FileUrl,
+                opts => opts.MapFrom(src => src.FilePath));
+        CreateMap<SubmissionForUpdateDto, Submission>()
+            .ForMember(s => s.FileUrl,
+                opts => opts.MapFrom(src => src.FilePath));
         CreateMap<GradeSubmissionForUpdateDto, Submission>();
 
         // Notification Mapping

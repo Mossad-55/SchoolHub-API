@@ -38,6 +38,8 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
     options.SuppressModelStateInvalidFilter = true;
 });
 
+
+builder.Services.AddMemoryCache();
 var app = builder.Build();
 
 var logger = app.Services.GetRequiredService<ILoggerManager>();

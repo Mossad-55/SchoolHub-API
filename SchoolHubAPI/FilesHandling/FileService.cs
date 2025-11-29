@@ -27,22 +27,21 @@ public class FileService : IFileService
 
     public async Task<string> SaveFileAsync(IFormFile file)
     {
-        if (IsValidImage(file))
-        {
-            var fileName = Guid.NewGuid() + Path.GetExtension(file.FileName);
-            var fullPath = Path.Combine(_uploadPath, fileName);
+        if (!IsValidFileExtension(file))
+            return string.Empty;
 
-            using var stream = new FileStream(fullPath, FileMode.Create);
+        var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+        var fileName = $"{Guid.NewGuid()}{extension}";
+        var fullPath = Path.Combine(_uploadPath, fileName);
 
-            await file.CopyToAsync(stream);
+        using var stream = new FileStream(fullPath, FileMode.Create);
+        await file.CopyToAsync(stream);
 
-            return $"uploads/{fileName}";
-        }
-
-        return string.Empty;
+        return $"/uploads/{fileName}"; // <-- FIXED
     }
 
-    private bool IsValidImage(IFormFile file)
+
+    private bool IsValidFileExtension(IFormFile file)
     {
         var allowedExtensions = new[] { ".pdf", ".doc", ".docx" };
         const long maxSize = 10 * 1024 * 1024;

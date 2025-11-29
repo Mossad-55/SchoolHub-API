@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SchoolHubAPI.Contracts;
 using SchoolHubAPI.Presentation.ActionFilters;
 using SchoolHubAPI.Service.Contracts;
@@ -12,6 +13,7 @@ namespace SchoolHubAPI.Presentation.Controllers;
 [Route("api/assignments/{assignmentId}/submissions")]
 [ApiController]
 [ApiExplorerSettings(GroupName = "v1")]
+[Authorize(Roles = "Teacher, Student")]
 public class SubmissionsController : ControllerBase
 {
     private readonly IServiceManager _service;
@@ -24,6 +26,7 @@ public class SubmissionsController : ControllerBase
     }
 
     [HttpGet]
+    [Authorize(Roles = "Teacher")]
     public async Task<IActionResult> GetSubmissions(Guid assignmentId, [FromQuery] RequestParameters requestParameters)
     {
         var result = await _service.SubmissionService.GetAllForAssignmentAsync(assignmentId, requestParameters, assignmentTrackChanges: false, subTrackChanges: false);
@@ -43,69 +46,84 @@ public class SubmissionsController : ControllerBase
 
     [HttpPost]
     [ServiceFilter(typeof(ValidationFilterAttribute))]
+    [Authorize(Roles = "Student")]
     public async Task<IActionResult> CreateSubmission(Guid assignmentId, [FromForm] SubmissionForCreationDto creationDto)
     {
         var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (!Guid.TryParse(userIdString, out Guid userId))
-        {
             return BadRequest(new { message = "Invalid user identifier." });
-        }
 
-        if(!await _service.SubmissionService.CheckForSubmissionAsync(assignmentId, userId, false, false))
+        string savedFilePath = string.Empty;
+
+        try
         {
-            try
+            if (!await _service.SubmissionService.CheckForSubmissionAsync(assignmentId, userId, false, false))
             {
-                creationDto.FilePath = await _fileService.SaveFileAsync(creationDto.File!);
+                savedFilePath = await _fileService.SaveFileAsync(creationDto.File!);
+                creationDto.FilePath = savedFilePath;
             }
-            catch (Exception ex)
-            {
-                return StatusCode(400, new { message = ex.Message });
-            }
+
+            var submissionDto = await _service.SubmissionService.SubmitAsync(
+                assignmentId, userId, creationDto, false, false);
+
+            return CreatedAtRoute("GetSubmissionById", new { assignmentId, submissionDto!.Id }, submissionDto);
         }
+        catch (Exception)
+        {
+            if (!string.IsNullOrWhiteSpace(savedFilePath))
+                _fileService.DeleteFile(savedFilePath);
 
-        var submittionDto = await _service.SubmissionService.SubmitAsync(assignmentId, userId, creationDto, assignmentTrackChanges: false, subTrackChanges: false);
-        if(submittionDto is null)
-            _fileService.DeleteFile(creationDto.FilePath!);
-
-        return CreatedAtRoute("GetSubmissionById", new { assignmentId, submittionDto!.Id }, submittionDto);
+            throw;
+        }
     }
+
 
     [HttpPut("{id:guid}")]
     [ServiceFilter(typeof(ValidationFilterAttribute))]
+    [Authorize(Roles = "Student")]
     public async Task<IActionResult> UpdateSubmission(Guid assignmentId, Guid id, [FromForm] SubmissionForUpdateDto updateDto)
     {
         var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if(!Guid.TryParse(userIdString, out Guid userId))
-        {
+        if (!Guid.TryParse(userIdString, out Guid userId))
             return BadRequest(new { message = "Invalid user identifier." });
-        }
 
-        if(updateDto.File != null)
+        string newFilePath = string.Empty;
+        string oldFilePath = updateDto.FilePath ?? string.Empty;
+
+        try
         {
-            try
+            if (updateDto.File != null)
             {
-                if (updateDto.FilePath != null)
-                    _fileService.DeleteFile(updateDto.FilePath);
+                newFilePath = await _fileService.SaveFileAsync(updateDto.File);
+                updateDto.FilePath = newFilePath;
+            }
+            else if (string.IsNullOrWhiteSpace(updateDto.FilePath))
+            {
+                updateDto.FilePath = string.Empty;
+            }
 
-                updateDto.FilePath = await _fileService.SaveFileAsync(updateDto.File);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(400, new { message = ex.Message });
-            }
-        }else if(updateDto.File == null && string.IsNullOrWhiteSpace(updateDto.FilePath))
-        {
-            _fileService.DeleteFile(updateDto.FilePath ?? string.Empty);
-            updateDto.FilePath = string.Empty;
+            await _service.SubmissionService.UpdateAsync(
+                assignmentId, userId, id, updateDto, false, true);
+
+            // Only delete old file if update succeeded and user uploaded a new one
+            if (updateDto.File != null && !string.IsNullOrWhiteSpace(oldFilePath))
+                _fileService.DeleteFile(oldFilePath);
+
+            return NoContent();
         }
+        catch (Exception)
+        {
+            if (!string.IsNullOrWhiteSpace(newFilePath))
+                _fileService.DeleteFile(newFilePath);
 
-        await _service.SubmissionService.UpdateAsync(assignmentId, userId, id, updateDto, assignmentTrackChanges: false, subTrackChanges: true);
-
-        return NoContent();
+            throw;
+        }
     }
+
 
     [HttpPut("{id:guid}/grade")]
     [ServiceFilter(typeof(ValidationFilterAttribute))]
+    [Authorize(Roles = "Teacher")]
     public async Task<IActionResult> GradeSubmission(Guid assignmentId, Guid id, [FromBody] GradeSubmissionForUpdateDto gradeDto)
     {
         var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;

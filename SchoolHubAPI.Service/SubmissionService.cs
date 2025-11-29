@@ -103,6 +103,7 @@ internal sealed class SubmissionService : ISubmissionService
         }
 
         var submissionEntity = _mapper.Map<Submission>(creationDto);
+        submissionEntity.AssignmentId = assignmentId;
         submissionEntity.StudentId = studentId;
 
         _repository.Submission.CreateSubmission(submissionEntity);

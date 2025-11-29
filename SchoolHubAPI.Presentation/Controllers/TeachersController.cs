@@ -10,7 +10,7 @@ namespace SchoolHubAPI.Presentation.Controllers;
 [Route("api/teachers")]
 [ApiController]
 [ApiExplorerSettings(GroupName = "v1")]
-[Authorize(Roles = "Admin")]
+[Authorize(Roles = "Teacher")]
 public class TeachersController : ControllerBase
 {
     private readonly IServiceManager _service;
@@ -18,6 +18,7 @@ public class TeachersController : ControllerBase
     public TeachersController(IServiceManager service) => _service = service;
 
     [HttpGet]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> GetTeachers([FromQuery] RequestParameters requestParameters)
     {
         var result = await _service.TeacherService.GetAllAsync(requestParameters, trackChanges: false);

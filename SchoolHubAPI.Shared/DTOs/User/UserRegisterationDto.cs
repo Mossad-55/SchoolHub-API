@@ -9,6 +9,7 @@ public record UserRegisterationDto
     public string? Password { get; set; }
     public string? ConfirmPassword { get; set; }
     public DateTime? CreatedDate { get; set; } = DateTime.UtcNow;
+    public bool IsActive { get; set; } = true;
     public string? Role { get; set; }
 
     // Specific props depends on the role.

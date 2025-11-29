@@ -10,4 +10,5 @@ public record BatchForStudentDto
     public string? StartDate { get; set; }
     public string? EndDate { get; set; }
     public bool IsActive { get; set; }
+    public Guid? BatchId { get; set; }
 }

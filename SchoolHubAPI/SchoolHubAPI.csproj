@@ -25,4 +25,8 @@
     <ProjectReference Include="..\SchoolHubAPI.Service\SchoolHubAPI.Service.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\uploads\" />
+  </ItemGroup>
+
 </Project>

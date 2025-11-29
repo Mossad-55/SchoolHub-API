@@ -10,7 +10,7 @@ namespace SchoolHubAPI.Presentation.Controllers;
 [Route("api/students")]
 [ApiController]
 [ApiExplorerSettings(GroupName = "v1")]
-[Authorize(Roles = "Admin, Teacher")]
+[Authorize(Roles = "Student")]
 public class StudentsController : ControllerBase
 {
     private readonly IServiceManager _service;
@@ -18,6 +18,7 @@ public class StudentsController : ControllerBase
     public StudentsController(IServiceManager service) => _service = service;
 
     [HttpGet]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> GetStudents([FromQuery] RequestParameters requestParameters)
     {
         var result = await _service.StudentService.GetAllAsync(requestParameters, trackChanges: false);
@@ -37,7 +38,7 @@ public class StudentsController : ControllerBase
     }
 
     [HttpGet("batches")]
-    [Authorize(Roles = "Student")]
+    [Authorize(Roles = "Student, Teacher")]
     public async Task<IActionResult> GetBachtesForStudent([FromQuery] RequestParameters requestParameters)
     {
         var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -54,7 +55,7 @@ public class StudentsController : ControllerBase
     }
 
     [HttpGet("batches/{batchId}/attendances")]
-    [Authorize(Roles = "Student")]
+    [Authorize(Roles = "Student, Teacher")]
     public async Task<IActionResult> GetAttendanceForStudent(Guid batchId, [FromQuery] RequestParameters requestParameters)
     {
         var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
