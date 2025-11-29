@@ -39,13 +39,13 @@ This API can be paired with any frontend (web, mobile) to build a full-fledged s
 ```
 SchoolHub‑API/
 ├── SchoolHub.Presentation       # Controllers, endpoints, filters, exception handling
-├── SchoolHub.Contracts          # DTOs, request/response models
+├── SchoolHub.Contracts          # Interfaces for Repository Layer
 ├── SchoolHub.Entities           # Domain entities & enums
-├── SchoolHub.LoggerService      # Logging abstraction (NLog or custom)
+├── SchoolHub.LoggerService      # Logging abstraction (NLog)
 ├── SchoolHub.Repository         # Data access layer (EF Core repositories)
 ├── SchoolHub.Service            # Business logic implementations
 ├── SchoolHub.Service.Contracts  # Interfaces for service layer
-└── SchoolHub.Shared             # Shared helpers, constants, utilities
+└── SchoolHub.Shared             # Shared helpers, constants, utilities, DTOs, Validators, and Request Features
 ```
 
 Follows Clean/Onion architecture for clear separation of concerns, easier testing, and maintainability.
@@ -83,8 +83,8 @@ dotnet run --project SchoolHub.API
 ```
 
 5. **Access the API**  
-   Base URL (default): `https://localhost:5001`  
-   Swagger UI: `https://localhost:5001/swagger` — for interactive documentation and testing
+   Base URL (default): `https://localhost:44353`  
+   Swagger UI: `https://localhost:44353/swagger` — for interactive documentation and testing
 
 ---
 
